@@ -568,6 +568,164 @@ MODULE_VERSION(RTL8168_VERSION);
 #undef LINUX_VERSION_CODE
 #define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 
+//Checksum offloading backport.
+unsigned int skb_checksum(const struct sk_buff *skb, int offset,
+        int len, unsigned int csum)
+{
+int start = skb_headlen(skb);
+int i, copy = start - offset;
+int pos = 0;
+
+/* Checksum header. */
+if (copy > 0) {
+if (copy > len)
+      copy = len;
+csum = csum_partial(skb->data + offset, copy, csum);
+if ((len -= copy) == 0)
+      return csum;
+offset += copy;
+pos     = copy;
+}
+
+for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+int end;
+
+BUG_TRAP(start <= offset + len);
+
+end = start + skb_shinfo(skb)->frags[i].size;
+if ((copy = end - offset) > 0) {
+      unsigned int csum2;
+      u8 *vaddr;
+      skb_frag_t *frag = &skb_shinfo(skb)->frags[i];
+
+      if (copy > len)
+              copy = len;
+      vaddr = kmap_skb_frag(frag);
+      csum2 = csum_partial(vaddr + frag->page_offset +
+                           offset - start, copy, 0);
+      kunmap_skb_frag(vaddr);
+      csum = csum_block_add(csum, csum2, pos);
+      if (!(len -= copy))
+              return csum;
+
+      offset += copy;
+      pos    += copy;
+}
+start = end;
+}
+if (skb_shinfo(skb)->frag_list) {
+      struct sk_buff *list = skb_shinfo(skb)->frag_list;
+
+      for (; list; list = list->next) {
+              int end;
+
+              BUG_TRAP(start <= offset + len);
+
+              end = start + list->len;
+              if ((copy = end - offset) > 0) {
+                      unsigned int csum2;
+                      if (copy > len)
+                              copy = len;
+                      csum2 = skb_checksum(list, offset - start,
+                                           copy, 0);
+                      csum = csum_block_add(csum, csum2, pos);
+                      if ((len -= copy) == 0)
+                              return csum;
+                      offset += copy;
+                      pos    += copy;
+              }
+              start = end;
+      }
+}
+BUG_ON(len);
+
+return csum;
+}
+
+int r8168_skb_checksum_help(struct sk_buff *skb)
+{
+	unsigned int csum;
+	int ret = 0, offset = skb->h.raw - skb->data;
+
+	if (unlikely(skb_shinfo(skb)->gso_size)) {
+		/* Let GSO fix up the checksum. */
+		goto out_set_summed;
+	}
+
+	if (skb_cloned(skb)) {
+		ret = pskb_expand_head(skb, 0, 0, GFP_ATOMIC);
+		if (ret)
+			goto out;
+	}
+
+	BUG_ON(offset > (int)skb->len);
+	csum = skb_checksum(skb, offset, skb->len-offset, 0);
+
+	offset = skb->tail - skb->h.raw;
+	BUG_ON(offset <= 0);
+	BUG_ON(skb->csum + 2 > offset);
+
+	*(u16*)(skb->h.raw + skb->csum) = csum_fold(csum);
+
+out_set_summed:
+	skb->ip_summed = CHECKSUM_NONE;
+out:	
+	return ret;
+}
+
+static inline bool
+rtl8168_tx_csum(struct sk_buff *skb,
+                struct net_device *dev,
+                u32 *opts)
+{
+        struct rtl8168_private *tp = netdev_priv(dev);
+        u32 csum_cmd = 0;
+        u8 sw_calc_csum = FALSE;
+
+        if (skb->ip_summed == CHECKSUM_PARTIAL) {
+
+                const struct iphdr *ip = skb->nh.iph;
+
+                if (dev->features & NETIF_F_IP_CSUM) {
+                        if (ip->protocol == IPPROTO_TCP)
+                                csum_cmd = tp->tx_ip_csum_cmd | tp->tx_tcp_csum_cmd;
+                        else if (ip->protocol == IPPROTO_UDP)
+                                csum_cmd = tp->tx_ip_csum_cmd | tp->tx_udp_csum_cmd;
+                        else if (ip->protocol == IPPROTO_IP)
+                                csum_cmd = tp->tx_ip_csum_cmd;
+                }
+
+                if (csum_cmd == 0) {
+                        sw_calc_csum = TRUE;
+                }
+        }
+
+        if (csum_cmd != 0) {
+                if (tp->ShortPacketSwChecksum && skb->len < ETH_ZLEN) {
+                        sw_calc_csum = TRUE;
+                        if (!rtl8168_skb_pad(skb)) {
+                                return false;
+                                WARN_ON(1); /* we need a WARN() */
+                        }
+                } else {
+                        if ((tp->mcfg == CFG_METHOD_1) || (tp->mcfg == CFG_METHOD_2) || (tp->mcfg == CFG_METHOD_3))
+                                opts[0] |= csum_cmd;
+                        else
+                                opts[1] |= csum_cmd;
+                }
+        }
+
+        if (tp->UseSwPaddingShortPkt && skb->len < ETH_ZLEN)
+                if (!rtl8168_skb_pad(skb))
+                        return false;
+
+        if (sw_calc_csum) {
+                r8168_skb_checksum_help(skb);
+        }
+
+        return true;
+}
+
 //Multicast backport, VMKernel pkt_type not defined in skbuff
 struct __skbuff_mhead
 {
@@ -30919,6 +31077,7 @@ static bool rtl8168_skb_pad(struct sk_buff *skb)
 #endif
 }
 
+#if !defined(__VMKLNX__)
 static inline bool
 rtl8168_tx_csum(struct sk_buff *skb,
                 struct net_device *dev,
@@ -31007,6 +31166,7 @@ rtl8168_tx_csum(struct sk_buff *skb,
 
         return true;
 }
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,0)
 /* r8169_csum_workaround()

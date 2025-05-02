@@ -1408,38 +1408,23 @@ static int proc_get_driver_variable(struct seq_file *m, void *v)
 {
         struct net_device *dev = m->private;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
 
         seq_puts(m, "\nDump Driver Variable\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         seq_puts(m, "Variable\tValue\n----------\t-----\n");
         seq_printf(m, "MODULENAME\t%s\n", MODULENAME);
         seq_printf(m, "driver version\t%s\n", RTL8168_VERSION);
         seq_printf(m, "chipset\t%d\n", tp->chipset);
         seq_printf(m, "chipset_name\t%s\n", rtl_chip_info[tp->chipset].name);
         seq_printf(m, "mtu\t%d\n", dev->mtu);
-        seq_printf(m, "num_rx_desc\t0x%x\n", tp->num_rx_desc);
-        seq_printf(m, "cur_rx0\t0x%x\n", tp->rx_ring[0].cur_rx);
-        seq_printf(m, "dirty_rx0\t0x%x\n", tp->rx_ring[0].dirty_rx);
-        seq_printf(m, "rdu0\t0x%x\n", tp->rx_ring[0].rdu);
-        seq_printf(m, "cur_rx1\t0x%x\n", tp->rx_ring[1].cur_rx);
-        seq_printf(m, "dirty_rx1\t0x%x\n", tp->rx_ring[1].dirty_rx);
-        seq_printf(m, "rdu1\t0x%x\n", tp->rx_ring[1].rdu);
-        seq_printf(m, "cur_rx2\t0x%x\n", tp->rx_ring[2].cur_rx);
-        seq_printf(m, "dirty_rx2\t0x%x\n", tp->rx_ring[2].dirty_rx);
-        seq_printf(m, "rdu2\t0x%x\n", tp->rx_ring[2].rdu);
-        seq_printf(m, "cur_rx3\t0x%x\n", tp->rx_ring[3].cur_rx);
-        seq_printf(m, "dirty_rx3\t0x%x\n", tp->rx_ring[3].dirty_rx);
-        seq_printf(m, "rdu3\t0x%x\n", tp->rx_ring[3].rdu);
-        seq_printf(m, "rx_fifo_of\t0x%x\n", tp->rx_fifo_of);
-        seq_printf(m, "num_tx_desc\t0x%x\n", tp->tx_ring[0].num_tx_desc);
-        seq_printf(m, "cur_tx0\t0x%x\n", tp->tx_ring[0].cur_tx);
-        seq_printf(m, "dirty_tx0\t0x%x\n", tp->tx_ring[0].dirty_tx);
-        seq_printf(m, "tdu0\t0x%x\n", tp->tx_ring[0].tdu);
-        seq_printf(m, "cur_tx1\t0x%x\n", tp->tx_ring[1].cur_tx);
-        seq_printf(m, "dirty_tx1\t0x%x\n", tp->tx_ring[1].dirty_tx);
-        seq_printf(m, "tdu1\t0x%x\n", tp->tx_ring[1].tdu);
+        seq_printf(m, "NUM_RX_DESC\t0x%x\n", NUM_RX_DESC);
+        seq_printf(m, "cur_rx\t0x%x\n", tp->cur_rx);
+        seq_printf(m, "dirty_rx\t0x%x\n", tp->dirty_rx);
+        seq_printf(m, "NUM_TX_DESC\t0x%x\n", NUM_TX_DESC);
+        seq_printf(m, "cur_tx\t0x%x\n", tp->cur_tx);
+        seq_printf(m, "dirty_tx\t0x%x\n", tp->dirty_tx);
         seq_printf(m, "rx_buf_sz\t0x%x\n", tp->rx_buf_sz);
         seq_printf(m, "esd_flag\t0x%x\n", tp->esd_flag);
         seq_printf(m, "pci_cfg_is_read\t0x%x\n", tp->pci_cfg_is_read);
@@ -1496,39 +1481,21 @@ static int proc_get_driver_variable(struct seq_file *m, void *v)
         seq_printf(m, "aspm\t0x%x\n", aspm);
         seq_printf(m, "s5wol\t0x%x\n", s5wol);
         seq_printf(m, "s5_keep_curr_mac\t0x%x\n", s5_keep_curr_mac);
-        seq_printf(m, "eee_enable\t0x%x\n", tp->eee.eee_enabled);
+        seq_printf(m, "eee_enable\t0x%x\n", tp->eee_enabled);
         seq_printf(m, "hwoptimize\t0x%lx\n", hwoptimize);
         seq_printf(m, "proc_init_num\t0x%x\n", proc_init_num);
         seq_printf(m, "s0_magic_packet\t0x%x\n", s0_magic_packet);
-        seq_printf(m, "disable_wol_support\t0x%x\n", disable_wol_support);
         seq_printf(m, "HwSuppMagicPktVer\t0x%x\n", tp->HwSuppMagicPktVer);
-        seq_printf(m, "HwSuppUpsVer\t0x%x\n", tp->HwSuppUpsVer);
-        seq_printf(m, "HwSuppEsdVer\t0x%x\n", tp->HwSuppEsdVer);
         seq_printf(m, "HwSuppCheckPhyDisableModeVer\t0x%x\n", tp->HwSuppCheckPhyDisableModeVer);
         seq_printf(m, "HwPkgDet\t0x%x\n", tp->HwPkgDet);
-        seq_printf(m, "InitRxDescType\t0x%x\n", tp->InitRxDescType);
-        seq_printf(m, "RxDescLength\t0x%x\n", tp->RxDescLength);
-        seq_printf(m, "num_rx_rings\t0x%x\n", tp->num_rx_rings);
-        seq_printf(m, "num_tx_rings\t0x%x\n", tp->num_tx_rings);
-        seq_printf(m, "tot_rx_rings\t0x%x\n", rtl8168_tot_rx_rings(tp));
-        seq_printf(m, "tot_tx_rings\t0x%x\n", rtl8168_tot_tx_rings(tp));
-        seq_printf(m, "HwSuppNumTxQueues\t0x%x\n", tp->HwSuppNumTxQueues);
-        seq_printf(m, "HwSuppNumRxQueues\t0x%x\n", tp->HwSuppNumRxQueues);
-        seq_printf(m, "num_hw_tot_en_rx_rings\t0x%x\n", tp->num_hw_tot_en_rx_rings);
-        seq_printf(m, "EnableRss\t0x%x\n", tp->EnableRss);
-        seq_printf(m, "min_irq_nvecs\t0x%x\n", tp->min_irq_nvecs);
-        seq_printf(m, "max_irq_nvecs\t0x%x\n", tp->max_irq_nvecs);
-        seq_printf(m, "irq_nvecs\t0x%x\n", tp->irq_nvecs);
-        seq_printf(m, "hw_supp_irq_nvecs\t0x%x\n", tp->hw_supp_irq_nvecs);
-        seq_printf(m, "ring_lib_enabled\t0x%x\n", tp->ring_lib_enabled);
+        seq_printf(m, "HwSuppGigaForceMode\t0x%x\n", tp->HwSuppGigaForceMode);
         seq_printf(m, "random_mac\t0x%x\n", tp->random_mac);
         seq_printf(m, "org_mac_addr\t%pM\n", tp->org_mac_addr);
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
         seq_printf(m, "perm_addr\t%pM\n", dev->perm_addr);
 #endif
         seq_printf(m, "dev_addr\t%pM\n", dev->dev_addr);
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_putc(m, '\n');
         return 0;
@@ -1540,37 +1507,50 @@ static int proc_get_tally_counter(struct seq_file *m, void *v)
         struct rtl8168_private *tp = netdev_priv(dev);
         struct rtl8168_counters *counters;
         dma_addr_t paddr;
+        u32 cmd;
+        u32 WaitCnt;
+        unsigned long flags;
 
         seq_puts(m, "\nDump Tally Counter\n");
 
-        rtnl_lock();
+        //ASSERT_RTNL();
 
         counters = tp->tally_vaddr;
         paddr = tp->tally_paddr;
         if (!counters) {
                 seq_puts(m, "\nDump Tally Counter Fail\n");
-                goto out_unlock;
+                return 0;
         }
 
-        rtl8168_dump_tally_counter(tp, paddr);
+        spin_lock_irqsave(&tp->lock, flags);
+        RTL_W32(tp, CounterAddrHigh, (u64)paddr >> 32);
+        cmd = (u64)paddr & DMA_BIT_MASK(32);
+        RTL_W32(tp, CounterAddrLow, cmd);
+        RTL_W32(tp, CounterAddrLow, cmd | CounterDump);
+
+        WaitCnt = 0;
+        while (RTL_R32(tp, CounterAddrLow) & CounterDump) {
+                udelay(10);
+
+                WaitCnt++;
+                if (WaitCnt > 20)
+                        break;
+        }
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_puts(m, "Statistics\tValue\n----------\t-----\n");
         seq_printf(m, "tx_packets\t%lld\n", le64_to_cpu(counters->tx_packets));
         seq_printf(m, "rx_packets\t%lld\n", le64_to_cpu(counters->rx_packets));
         seq_printf(m, "tx_errors\t%lld\n", le64_to_cpu(counters->tx_errors));
-        seq_printf(m, "rx_errors\t%d\n", le32_to_cpu(counters->rx_errors));
-        seq_printf(m, "rx_missed\t%d\n", le16_to_cpu(counters->rx_missed));
-        seq_printf(m, "align_errors\t%d\n", le16_to_cpu(counters->align_errors));
-        seq_printf(m, "tx_one_collision\t%d\n", le32_to_cpu(counters->tx_one_collision));
-        seq_printf(m, "tx_multi_collision\t%d\n", le32_to_cpu(counters->tx_multi_collision));
+        seq_printf(m, "rx_missed\t%lld\n", le64_to_cpu(counters->rx_missed));
+        seq_printf(m, "align_errors\t%lld\n", le64_to_cpu(counters->align_errors));
+        seq_printf(m, "tx_one_collision\t%lld\n", le64_to_cpu(counters->tx_one_collision));
+        seq_printf(m, "tx_multi_collision\t%lld\n", le64_to_cpu(counters->tx_multi_collision));
         seq_printf(m, "rx_unicast\t%lld\n", le64_to_cpu(counters->rx_unicast));
         seq_printf(m, "rx_broadcast\t%lld\n", le64_to_cpu(counters->rx_broadcast));
-        seq_printf(m, "rx_multicast\t%d\n", le32_to_cpu(counters->rx_multicast));
-        seq_printf(m, "tx_aborted\t%d\n", le16_to_cpu(counters->tx_aborted));
-        seq_printf(m, "tx_underrun\t%d\n", le16_to_cpu(counters->tx_underrun));
-
-out_unlock:
-        rtnl_unlock();
+        seq_printf(m, "rx_multicast\t%lld\n", le64_to_cpu(counters->rx_multicast));
+        seq_printf(m, "tx_aborted\t%lld\n", le64_to_cpu(counters->tx_aborted));
+        seq_printf(m, "tx_underun\t%lld\n", le64_to_cpu(counters->tx_underun));
 
         seq_putc(m, '\n');
         return 0;
@@ -1583,12 +1563,12 @@ static int proc_get_registers(struct seq_file *m, void *v)
         u8 byte_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
         void __iomem *ioaddr = tp->mmio_addr;
+        unsigned long flags;
 
         seq_puts(m, "\nDump MAC Registers\n");
         seq_puts(m, "Offset\tValue\n------\t-----\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%02x:\t", n);
 
@@ -1597,8 +1577,7 @@ static int proc_get_registers(struct seq_file *m, void *v)
                         seq_printf(m, "%02x ", byte_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_putc(m, '\n');
         return 0;
@@ -1610,12 +1589,12 @@ static int proc_get_pcie_phy(struct seq_file *m, void *v)
         int i, n, max = R8168_EPHY_REGS_SIZE/2;
         u16 word_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
 
         seq_puts(m, "\nDump PCIE PHY\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%02x:\t", n);
 
@@ -1624,8 +1603,7 @@ static int proc_get_pcie_phy(struct seq_file *m, void *v)
                         seq_printf(m, "%04x ", word_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_putc(m, '\n');
         return 0;
@@ -1637,12 +1615,12 @@ static int proc_get_eth_phy(struct seq_file *m, void *v)
         int i, n, max = R8168_PHY_REGS_SIZE/2;
         u16 word_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
 
         seq_puts(m, "\nDump Ethernet PHY\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         seq_puts(m, "\n####################page 0##################\n ");
         rtl8168_mdio_write(tp, 0x1f, 0x0000);
         for (n = 0; n < max;) {
@@ -1653,8 +1631,7 @@ static int proc_get_eth_phy(struct seq_file *m, void *v)
                         seq_printf(m, "%04x ", word_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_putc(m, '\n');
         return 0;
@@ -1666,6 +1643,7 @@ static int proc_get_extended_registers(struct seq_file *m, void *v)
         int i, n, max = R8168_ERI_REGS_SIZE;
         u32 dword_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
 
         switch (tp->mcfg) {
         case CFG_METHOD_1:
@@ -1679,8 +1657,7 @@ static int proc_get_extended_registers(struct seq_file *m, void *v)
         seq_puts(m, "\nDump Extended Registers\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%02x:\t", n);
 
@@ -1689,8 +1666,7 @@ static int proc_get_extended_registers(struct seq_file *m, void *v)
                         seq_printf(m, "%08x ", dword_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_putc(m, '\n');
         return 0;
@@ -1702,12 +1678,12 @@ static int proc_get_pci_registers(struct seq_file *m, void *v)
         int i, n, max = R8168_PCI_REGS_SIZE;
         u32 dword_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
 
         seq_puts(m, "\nDump PCI Registers\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%03x:\t", n);
 
@@ -1724,225 +1700,7 @@ static int proc_get_pci_registers(struct seq_file *m, void *v)
         pci_read_config_dword(tp->pci_dev, n, &dword_rd);
         seq_printf(m, "\n0x%03x:\t%08x ", n, dword_rd);
 
-        rtnl_unlock();
-
-        seq_putc(m, '\n');
-        return 0;
-}
-
-static int proc_get_cable_info(struct seq_file *m, void *v)
-{
-        int i;
-        u16 status;
-        int cp_status[RTL8168_CP_NUM] = {0};
-        u16 cp_len[RTL8168_CP_NUM] = {0};
-        struct net_device *dev = m->private;
-        struct rtl8168_private *tp = netdev_priv(dev);
-        const char *pair_str[RTL8168_CP_NUM] = {"1-2", "3-6", "4-5", "7-8"};
-
-        switch (tp->mcfg) {
-        case CFG_METHOD_30:
-        case CFG_METHOD_35:
-        case CFG_METHOD_36:
-        case CFG_METHOD_37:
-                /* support */
-                break;
-        default:
-                return -EOPNOTSUPP;
-        }
-
-        rtnl_lock();
-
-        rtl8168_mdio_write(tp, 0x1f, 0x0000);
-        if (rtl8168_mdio_read(tp, MII_BMCR) & BMCR_PDOWN) {
-                rtnl_unlock();
-                return -EIO;
-        }
-
-        status = RTL_R8(tp, PHYstatus);
-        if (status & LinkStatus)
-                seq_printf(m, "\nlink speed:%d",
-                           rtl8168_convert_link_speed(status));
-        else
-                seq_puts(m, "\nlink status:off");
-
-        rtl8168_get_cp_len(tp, cp_len);
-
-        rtl8168_vcd_test(tp);
-
-        rtl8168_get_cp_status(tp, cp_status);
-
-        seq_puts(m, "\npair\tlength\tstatus   \tpp\n");
-
-        for (i =0; i<RTL8168_CP_NUM; i++) {
-                seq_printf(m, "%s\t%d\t%s\t",
-                           pair_str[i], cp_len[i],
-                           rtl8168_get_cp_status_string(cp_status[i]));
-                if (cp_status[i] == rtl8168_cp_normal)
-                        seq_printf(m, "none\n");
-                else
-                        seq_printf(m, "%dm\n", rtl8168_get_cp_pp(tp, i));
-        }
-
-        tp->phy_reset_enable(dev);
-
-        rtl8168_set_speed(dev, tp->autoneg, tp->speed, tp->duplex, tp->advertising);
-
-        rtnl_unlock();
-
-        seq_putc(m, '\n');
-        return 0;
-}
-
-static int proc_dump_rx_desc(struct seq_file *m, void *v)
-{
-        int i;
-        u32 *pdword;
-        struct net_device *dev = m->private;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        if (!tp->RxDescArray)
-                return -EOPNOTSUPP;
-
-        rtnl_lock();
-
-        seq_printf(m, "\ndump rx desc:%d\n", tp->num_rx_desc);
-
-        pdword = (u32*)tp->RxDescArray;
-        for (i=0; i<(tp->RxDescAllocSize/4); i++) {
-                if (!(i % 4))
-                        seq_printf(m, "\n%04x ", i);
-                seq_printf(m, "%08x ", pdword[i]);
-        }
-
-        rtnl_unlock();
-
-        seq_putc(m, '\n');
-        return 0;
-}
-
-static int proc_dump_rx_desc_2(struct seq_file *m, void *v)
-{
-        int i, j, k;
-        u32 *pdword;
-        struct net_device *dev = m->private;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        if (!tp->RxDescArray)
-                return -EOPNOTSUPP;
-
-        rtnl_lock();
-
-        for (k=0; k<tp->num_hw_tot_en_rx_rings; k++) {
-                seq_printf(m, "\ndump Q%d rx desc:%d\n", k, tp->num_rx_desc);
-                for (j=0; j<tp->num_rx_desc; j++) {
-                        pdword = (u32*)rtl8168_get_rxdesc(tp,
-                                                          tp->RxDescArray,
-                                                          j, k);
-                        for (i=0; i<(tp->RxDescLength/4); i++) {
-                                if (!(i % 4))
-                                        seq_printf(m, "\n%04llx ",
-                                                   ((u64)pdword + (i * 4) -
-                                                    (u64)tp->RxDescArray));
-                                seq_printf(m, "%08x ", pdword[i]);
-                        }
-                }
-
-                seq_putc(m, '\n');
-        }
-
-        rtnl_unlock();
-
-        seq_putc(m, '\n');
-        return 0;
-}
-
-void _proc_dump_tx_desc(struct seq_file *m, struct TxDesc *desc_base,
-                        u32 alloc_size, u32 num_desc)
-{
-        int i;
-        u32 *pdword;
-
-        if (desc_base == NULL ||
-            alloc_size == 0 ||
-            num_desc == 0)
-                return;
-
-        pdword = (u32*)desc_base;
-        for (i=0; i<(alloc_size/4); i++) {
-                if (!(i % 4))
-                        seq_printf(m, "\n%04x ", i);
-                seq_printf(m, "%08x ", pdword[i]);
-        }
-
-        seq_putc(m, '\n');
-        return;
-}
-
-static int proc_dump_tx_desc(struct seq_file *m, void *v)
-{
-        int i;
-        struct net_device *dev = m->private;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        rtnl_lock();
-
-        for (i=0; i<tp->HwSuppNumTxQueues; i++) {
-                struct rtl8168_tx_ring *ring = &tp->tx_ring[i];
-                if (!ring->TxDescArray)
-                        continue;
-                seq_printf(m, "\ndump Q%d tx desc:%d\n", i, ring->num_tx_desc);
-                _proc_dump_tx_desc(m, ring->TxDescArray,
-                                   ring->TxDescAllocSize,
-                                   ring->num_tx_desc);
-        }
-
-#ifdef ENABLE_LIB_SUPPORT
-        for (i=0; i<tp->HwSuppNumTxQueues; i++) {
-                struct rtl8168_ring *ring = &tp->lib_tx_ring[i];
-                if (!ring->desc_addr)
-                        continue;
-                seq_printf(m, "\ndump lib Q%d tx desc:%d\n", i, ring->ring_size);
-                _proc_dump_tx_desc(m, ring->desc_addr,
-                                   ring->desc_size,
-                                   ring->ring_size);
-        }
-#endif //ENABLE_LIB_SUPPORT
-
-        rtnl_unlock();
-
-        seq_putc(m, '\n');
-        return 0;
-}
-
-static int proc_dump_msix_tbl(struct seq_file *m, void *v)
-{
-        int i, j;
-        struct net_device *dev = m->private;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        switch (tp->mcfg) {
-        case CFG_METHOD_1 ... CFG_METHOD_8:
-                return -EOPNOTSUPP;
-        default:
-                break;
-        }
-
-        rtnl_lock();
-
-        seq_printf(m, "\ndump MSI-X Table. Total Entry %d. \n",
-                   tp->hw_supp_irq_nvecs);
-
-        for (i=0; i<tp->hw_supp_irq_nvecs; i++) {
-                seq_printf(m, "\n%04x ", i);
-                for (j=0; j<4; j++)
-                        seq_printf(m, "%08x ",
-                                   rtl8168_eri_read(
-                                           tp, i*0x10 + 4 * j, 4,
-                                           ERIAR_MSIX));
-        }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         seq_putc(m, '\n');
         return 0;
@@ -1955,13 +1713,13 @@ static int proc_get_driver_variable(char *page, char **start,
 {
         struct net_device *dev = data;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
         int len = 0;
 
         len += snprintf(page + len, count - len,
                         "\nDump Driver Driver\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         len += snprintf(page + len, count - len,
                         "Variable\tValue\n----------\t-----\n");
 
@@ -1971,27 +1729,12 @@ static int proc_get_driver_variable(char *page, char **start,
                         "chipset\t%d\n"
                         "chipset_name\t%s\n"
                         "mtu\t%d\n"
-                        "num_rx_desc\t0x%x\n"
-                        "cur_rx0\t0x%x\n"
-                        "dirty_rx0\t0x%x\n"
-                        "rdu0\t0x%x\n"
-                        "cur_rx1\t0x%x\n"
-                        "dirty_rx1\t0x%x\n"
-                        "rdu1\t0x%x\n"
-                        "cur_rx2\t0x%x\n"
-                        "dirty_rx2\t0x%x\n"
-                        "rdu2\t0x%x\n"
-                        "cur_rx3\t0x%x\n"
-                        "dirty_rx3\t0x%x\n"
-                        "rdu3\t0x%x\n"
-                        "rx_fifo_of\t0x%x\n"
-                        "num_tx_desc\t0x%x\n"
-                        "cur_tx0\t0x%x\n"
-                        "dirty_tx0\t0x%x\n"
-                        "tdu0\t0x%x\n"
-                        "cur_tx1\t0x%x\n"
-                        "dirty_tx1\t0x%x\n"
-                        "tdu0\t1x%x\n"
+                        "NUM_RX_DESC\t0x%x\n"
+                        "cur_rx\t0x%x\n"
+                        "dirty_rx\t0x%x\n"
+                        "NUM_TX_DESC\t0x%x\n"
+                        "cur_tx\t0x%x\n"
+                        "dirty_tx\t0x%x\n"
                         "rx_buf_sz\t0x%x\n"
                         "esd_flag\t0x%x\n"
                         "pci_cfg_is_read\t0x%x\n"
@@ -2052,28 +1795,10 @@ static int proc_get_driver_variable(char *page, char **start,
                         "hwoptimize\t0x%lx\n"
                         "proc_init_num\t0x%x\n"
                         "s0_magic_packet\t0x%x\n"
-                        "disable_wol_support\t0x%x\n"
                         "HwSuppMagicPktVer\t0x%x\n"
-                        "HwSuppUpsVer\t0x%x\n"
-                        "HwSuppEsdVer\t0x%x\n"
                         "HwSuppCheckPhyDisableModeVer\t0x%x\n"
                         "HwPkgDet\t0x%x\n"
-                        "InitRxDescType\t0x%x\n"
-                        "RxDescLength\t0x%x\n"
-                        "num_rx_rings\t0x%x\n"
-                        "num_tx_rings\t0x%x\n"
-                        "tot_rx_rings\t0x%x\n"
-                        "tot_tx_rings\t0x%x\n"
-                        "tot_rx_desc_rings\t0x%x\n"
-                        "HwSuppNumTxQueues\t0x%x\n"
-                        "HwSuppNumRxQueues\t0x%x\n"
-                        "num_hw_tot_en_rx_rings\t0x%x\n"
-                        "EnableRss\t0x%x\n"
-                        "min_irq_nvecs\t0x%x\n"
-                        "max_irq_nvecs\t0x%x\n"
-                        "irq_nvecs\t0x%x\n"
-                        "hw_supp_irq_nvecs\t0x%x\n"
-                        "ring_lib_enabled\t0x%x\n"
+                        "HwSuppGigaForceMode\t0x%x\n"
                         "random_mac\t0x%x\n"
                         "org_mac_addr\t%pM\n"
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
@@ -2085,27 +1810,12 @@ static int proc_get_driver_variable(char *page, char **start,
                         tp->chipset,
                         rtl_chip_info[tp->chipset].name,
                         dev->mtu,
-                        tp->num_rx_desc,
-                        tp->rx_ring[0].cur_rx,
-                        tp->rx_ring[0].dirty_rx,
-                        tp->rx_ring[0].rdu,
-                        tp->rx_ring[1].cur_rx,
-                        tp->rx_ring[1].dirty_rx,
-                        tp->rx_ring[1].rdu,
-                        tp->rx_ring[2].cur_rx,
-                        tp->rx_ring[2].dirty_rx,
-                        tp->rx_ring[2].rdu,
-                        tp->rx_ring[3].cur_rx,
-                        tp->rx_ring[3].dirty_rx,
-                        tp->rx_ring[3].rdu,
-                        tp->rx_fifo_of,
-                        tp->tx_ring[0].num_tx_desc,
-                        tp->tx_ring[0].cur_tx,
-                        tp->tx_ring[0].dirty_tx,
-                        tp->tx_ring[0].tdu,
-                        tp->tx_ring[1].cur_tx,
-                        tp->tx_ring[1].dirty_tx,
-                        tp->tx_ring[1].tdu,
+                        NUM_RX_DESC,
+                        tp->cur_rx,
+                        tp->dirty_rx,
+                        NUM_TX_DESC,
+                        tp->cur_tx,
+                        tp->dirty_tx,
                         tp->rx_buf_sz,
                         tp->esd_flag,
                         tp->pci_cfg_is_read,
@@ -2162,31 +1872,14 @@ static int proc_get_driver_variable(char *page, char **start,
                         aspm,
                         s5wol,
                         s5_keep_curr_mac,
-                        tp->eee.eee_enabled,
+                        tp->eee_enabled,
                         hwoptimize,
                         proc_init_num,
                         s0_magic_packet,
-                        disable_wol_support,
                         tp->HwSuppMagicPktVer,
-                        tp->HwSuppUpsVer,
-                        tp->HwSuppEsdVer,
                         tp->HwSuppCheckPhyDisableModeVer,
                         tp->HwPkgDet,
-                        tp->InitRxDescType,
-                        tp->RxDescLength,
-                        tp->num_rx_rings,
-                        tp->num_tx_rings,
-                        rtl8168_tot_rx_rings(tp),
-                        rtl8168_tot_tx_rings(tp),
-                        tp->HwSuppNumTxQueues,
-                        tp->HwSuppNumRxQueues,
-                        tp->num_hw_tot_en_rx_rings,
-                        tp->EnableRss,
-                        tp->min_irq_nvecs,
-                        tp->max_irq_nvecs,
-                        tp->irq_nvecs,
-                        tp->hw_supp_irq_nvecs,
-                        tp->ring_lib_enabled,
+                        tp->HwSuppGigaForceMode,
                         tp->random_mac,
                         tp->org_mac_addr,
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
@@ -2194,8 +1887,7 @@ static int proc_get_driver_variable(char *page, char **start,
 #endif
                         dev->dev_addr
                        );
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2213,22 +1905,37 @@ static int proc_get_tally_counter(char *page, char **start,
         dma_addr_t paddr;
         u32 cmd;
         u32 WaitCnt;
+        unsigned long flags;
         int len = 0;
 
         len += snprintf(page + len, count - len,
                         "\nDump Tally Counter\n");
 
-        rtnl_lock();
+        //ASSERT_RTNL();
 
         counters = tp->tally_vaddr;
         paddr = tp->tally_paddr;
         if (!counters) {
                 len += snprintf(page + len, count - len,
                                 "\nDump Tally Counter Fail\n");
-                goto out_unlock;
+                goto out;
         }
 
-        rtl8168_dump_tally_counter(tp, paddr);
+        spin_lock_irqsave(&tp->lock, flags);
+        RTL_W32(tp, CounterAddrHigh, (u64)paddr >> 32);
+        cmd = (u64)paddr & DMA_BIT_MASK(32);
+        RTL_W32(tp, CounterAddrLow, cmd);
+        RTL_W32(tp, CounterAddrLow, cmd | CounterDump);
+
+        WaitCnt = 0;
+        while (RTL_R32(tp, CounterAddrLow) & CounterDump) {
+                udelay(10);
+
+                WaitCnt++;
+                if (WaitCnt > 20)
+                        break;
+        }
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len,
                         "Statistics\tValue\n----------\t-----\n");
@@ -2237,35 +1944,31 @@ static int proc_get_tally_counter(char *page, char **start,
                         "tx_packets\t%lld\n"
                         "rx_packets\t%lld\n"
                         "tx_errors\t%lld\n"
-                        "rx_errors\t%d\n"
-                        "rx_missed\t%d\n"
-                        "align_errors\t%d\n"
-                        "tx_one_collision\t%d\n"
-                        "tx_multi_collision\t%d\n"
+                        "rx_missed\t%lld\n"
+                        "align_errors\t%lld\n"
+                        "tx_one_collision\t%lld\n"
+                        "tx_multi_collision\t%lld\n"
                         "rx_unicast\t%lld\n"
                         "rx_broadcast\t%lld\n"
-                        "rx_multicast\t%d\n"
-                        "tx_aborted\t%d\n"
-                        "tx_underrun\t%d\n",
+                        "rx_multicast\t%lld\n"
+                        "tx_aborted\t%lld\n"
+                        "tx_underun\t%lld\n",
                         le64_to_cpu(counters->tx_packets),
                         le64_to_cpu(counters->rx_packets),
                         le64_to_cpu(counters->tx_errors),
-                        le32_to_cpu(counters->rx_errors),
-                        le16_to_cpu(counters->rx_missed),
-                        le16_to_cpu(counters->align_errors),
-                        le32_to_cpu(counters->tx_one_collision),
-                        le32_to_cpu(counters->tx_multi_collision),
+                        le64_to_cpu(counters->rx_missed),
+                        le64_to_cpu(counters->align_errors),
+                        le64_to_cpu(counters->tx_one_collision),
+                        le64_to_cpu(counters->tx_multi_collision),
                         le64_to_cpu(counters->rx_unicast),
                         le64_to_cpu(counters->rx_broadcast),
-                        le32_to_cpu(counters->rx_multicast),
-                        le16_to_cpu(counters->tx_aborted),
-                        le16_to_cpu(counters->tx_underrun)
+                        le64_to_cpu(counters->rx_multicast),
+                        le64_to_cpu(counters->tx_aborted),
+                        le64_to_cpu(counters->tx_underun)
                        );
 
         len += snprintf(page + len, count - len, "\n");
-out_unlock:
-        rtnl_unlock();
-
+out:
         *eof = 1;
         return len;
 }
@@ -2279,14 +1982,14 @@ static int proc_get_registers(char *page, char **start,
         u8 byte_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
         void __iomem *ioaddr = tp->mmio_addr;
+        unsigned long flags;
         int len = 0;
 
         len += snprintf(page + len, count - len,
                         "\nDump MAC Registers\n"
                         "Offset\tValue\n------\t-----\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%02x:\t",
@@ -2299,8 +2002,7 @@ static int proc_get_registers(char *page, char **start,
                                         byte_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2316,14 +2018,14 @@ static int proc_get_pcie_phy(char *page, char **start,
         int i, n, max = R8168_EPHY_REGS_SIZE/2;
         u16 word_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
         int len = 0;
 
         len += snprintf(page + len, count - len,
                         "\nDump PCIE PHY\n"
                         "Offset\tValue\n------\t-----\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%02x:\t",
@@ -2336,8 +2038,7 @@ static int proc_get_pcie_phy(char *page, char **start,
                                         word_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2353,14 +2054,14 @@ static int proc_get_eth_phy(char *page, char **start,
         int i, n, max = R8168_PHY_REGS_SIZE/2;
         u16 word_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
         int len = 0;
 
         len += snprintf(page + len, count - len,
                         "\nDump Ethernet PHY\n"
                         "Offset\tValue\n------\t-----\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         len += snprintf(page + len, count - len,
                         "\n####################page 0##################\n");
         rtl8168_mdio_write(tp, 0x1f, 0x0000);
@@ -2376,8 +2077,7 @@ static int proc_get_eth_phy(char *page, char **start,
                                         word_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2393,6 +2093,7 @@ static int proc_get_extended_registers(char *page, char **start,
         int i, n, max = R8168_ERI_REGS_SIZE;
         u32 dword_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
         int len = 0;
 
         switch (tp->mcfg) {
@@ -2410,8 +2111,7 @@ static int proc_get_extended_registers(char *page, char **start,
                         "\nDump Extended Registers\n"
                         "Offset\tValue\n------\t-----\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%02x:\t",
@@ -2424,8 +2124,7 @@ static int proc_get_extended_registers(char *page, char **start,
                                         dword_rd);
                 }
         }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len, "\n");
 out:
@@ -2441,14 +2140,14 @@ static int proc_get_pci_registers(char *page, char **start,
         int i, n, max = R8168_PCI_REGS_SIZE;
         u32 dword_rd;
         struct rtl8168_private *tp = netdev_priv(dev);
+        unsigned long flags;
         int len = 0;
 
         len += snprintf(page + len, count - len,
                         "\nDump PCI Registers\n"
                         "Offset\tValue\n------\t-----\n");
 
-        rtnl_lock();
-
+        spin_lock_irqsave(&tp->lock, flags);
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%03x:\t",
@@ -2474,332 +2173,14 @@ static int proc_get_pci_registers(char *page, char **start,
                         "\n0x%03x:\t%08x ",
                         n,
                         dword_rd);
-
-        rtnl_unlock();
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *eof = 1;
-        return len;
-}
-
-static int proc_get_cable_info(char *page, char **start,
-                               off_t offset, int count,
-                               int *eof, void *data)
-{
-        int i;
-        u16 status;
-        int len = 0;
-        struct net_device *dev = data;
-        int cp_status[RTL8168_CP_NUM] = {0};
-        u16 cp_len[RTL8168_CP_NUM] = {0};
-        struct rtl8168_private *tp = netdev_priv(dev);
-        const char *pair_str[RTL8168_CP_NUM] = {"1-2", "3-6", "4-5", "7-8"};
-
-        switch (tp->mcfg) {
-        case CFG_METHOD_30:
-        case CFG_METHOD_35:
-        case CFG_METHOD_36:
-        case CFG_METHOD_37:
-                /* support */
-                break;
-        default:
-                return -EOPNOTSUPP;
-        }
-
-        rtnl_lock();
-
-        status = RTL_R8(tp, PHYstatus);
-        if (status & LinkStatus)
-                len += snprintf(page + len, count - len,
-                                "\nlink speed:%d",
-                                rtl8168_convert_link_speed(status));
-        else
-                len += snprintf(page + len, count - len,
-                                "\nlink status:off");
-
-        rtl8168_get_cp(tp, cp_len, cp_status);
-
-        len += snprintf(page + len, count - len,
-                        "\npair\tlength\tstatus   \tpp\n");
-
-        for (i =0; i<RTL8168_CP_NUM; i++) {
-                len += snprintf(page + len, count - len,
-                                "%s\t%d\t%s\t",
-                                pair_str[i], cp_len[i],
-                                rtl8168_get_cp_status_string(cp_status[i]));
-                if (cp_status[i] == rtl8168_cp_normal)
-                        len += snprintf(page + len, count - len, "none\n");
-                else
-                        len += snprintf(page + len, count - len, "%dm\n",
-                                        rtl8168_get_cp_pp(tp, i));
-        }
-
-        rtnl_unlock();
+        spin_unlock_irqrestore(&tp->lock, flags);
 
         len += snprintf(page + len, count - len, "\n");
 
         *eof = 1;
         return len;
 }
-
-static int proc_dump_rx_desc(char *page, char **start,
-                             off_t offset, int count,
-                             int *eof, void *data)
-{
-        int i;
-        int len = 0;
-        u32 *pdword;
-        struct net_device *dev = data;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        if (!tp->RxDescArray)
-                return -EOPNOTSUPP;
-
-        rtnl_lock();
-
-        len += snprintf(page + len, count - len,
-                        "\ndump rx desc:%d",
-                        tp->num_rx_desc);
-
-        pdword = (u32*)tp->RxDescArray;
-        for (i=0; i<(tp->RxDescAllocSize/4); i++) {
-                if (!(i % 4))
-                        len += snprintf(page + len, count - len,
-                                        "\n%04x ",
-                                        i);
-                len += snprintf(page + len, count - len,
-                                "%08x ",
-                                pdword[i]);
-        }
-
-        rtnl_unlock();
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *eof = 1;
-
-        return len;
-}
-
-static int proc_dump_rx_desc_2(char *page, char **start,
-                               off_t offset, int count,
-                               int *eof, void *data)
-{
-        int i, j, k;
-        int len = 0;
-        u32 *pdword;
-        struct net_device *dev = data;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        if (!tp->RxDescArray)
-                return -EOPNOTSUPP;
-
-        rtnl_lock();
-
-        for (k=0; k<tp->num_hw_tot_en_rx_rings; k++) {
-                len += snprintf(page + len, count - len,
-                                "\ndump Q%d rx desc:%d",
-                                k,
-                                tp->num_rx_desc);
-                for (j=0; j<tp->num_rx_desc; j++) {
-                        pdword = (u32*)rtl8168_get_rxdesc(tp,
-                                                          tp->RxDescArray,
-                                                          j, k);
-                        for (i=0; i<(tp->RxDescLength/4); i++) {
-                                if (!(i % 4))
-                                        len += snprintf(page + len, count - len,
-                                                        "\n%04llx ",
-                                                        ((u64)pdword + (i * 4) -
-                                                         (u64)tp->RxDescArray));
-                                len += snprintf(page + len, count - len,
-                                                "%08x ",
-                                                pdword[i]);
-                        }
-                }
-
-                len += snprintf(page + len, count - len, "\n");
-        }
-
-        rtnl_unlock();
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *eof = 1;
-
-        return len;
-}
-
-void _proc_dump_tx_desc(char *page, int *page_len, int *count,
-                        struct TxDesc *desc_base,
-                        u32 alloc_size, u32 num_desc)
-{
-        int i;
-        int len = 0;
-        u32 *pdword;
-
-        if (desc_base == NULL ||
-            alloc_size == 0 ||
-            num_desc == 0)
-                return;
-
-        len = *page_len;
-        pdword = (u32*)desc_base;
-        for (i=0; i<(alloc_size/4); i++) {
-                if (!(i % 4))
-                        len += snprintf(page + len, *count - len,
-                                        "\n%04x ",
-                                        i);
-                len += snprintf(page + len, *count - len,
-                                "%08x ",
-                                pdword[i]);
-        }
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *page_len = len;
-        return;
-}
-
-static int proc_dump_tx_desc(char *page, char **start,
-                             off_t offset, int count,
-                             int *eof, void *data)
-{
-        int i;
-        int len = 0;
-        u32 *pdword;
-        struct net_device *dev = data;
-        struct rtl8168_private *tp = netdev_priv(dev);
-        struct rtl8168_tx_ring *ring = &tp->tx_ring[0];
-
-        if (!ring->TxDescArray)
-                return -EOPNOTSUPP;
-
-        rtnl_lock();
-
-        for (i=0; i<tp->HwSuppNumTxQueues; i++) {
-                struct rtl8168_tx_ring *ring = &tp->tx_ring[i];
-                if (!ring->TxDescArray)
-                        continue;
-                len += snprintf(page + len, count - len,
-                                "\ndump Q%d tx desc:%d",
-                                i,
-                                ring->num_tx_desc);
-                _proc_dump_tx_desc(page, &len, &count,
-                                   ring->TxDescArray,
-                                   ring->TxDescAllocSize,
-                                   ring->num_tx_desc);
-        }
-
-#ifdef ENABLE_LIB_SUPPORT
-        for (i=0; i<tp->HwSuppNumTxQueues; i++) {
-                struct rtl8168_ring *ring = &tp->lib_tx_ring[i];
-                if (!ring->desc_addr)
-                        continue;
-                len += snprintf(page + len, count - len,
-                                "\ndump lib Q%d tx desc:%d",
-                                i,
-                                ring->ring_size);
-                _proc_dump_tx_desc(page, &len, ring->desc_addr,
-                                   ring->desc_size,
-                                   ring->ring_size);
-        }
-#endif //ENABLE_LIB_SUPPORT
-
-        rtnl_unlock();
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *eof = 1;
-
-        return len;
-}
-
-static int proc_dump_tx_desc(char *page, char **start,
-                             off_t offset, int count,
-                             int *eof, void *data)
-{
-        int i;
-        struct net_device *dev = m->private;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        switch (tp->mcfg) {
-        case CFG_METHOD_1 ... CFG_METHOD_8:
-                return -EOPNOTSUPP;
-        default:
-                break;
-        }
-
-        rtnl_lock();
-
-        len += snprintf(page + len, count - len,
-                        "\ndump MSI-X Table. Total Entry %d. \n",
-                        R8168_MAX_MSIX_VEC);
-
-        for (i=0; i<R8168_MAX_MSIX_VEC; i++) {
-                len += snprintf(page + len, count - len,
-                                "\n%04x ",
-                                i);
-                len += snprintf(page + len, count - len,
-                                "%08x ",
-                                rtl8168_eri_read(tp, i*0x10, 4,
-                                                 ERIAR_MSIX));
-                len += snprintf(page + len, count - len,
-                                "%08x ",
-                                rtl8168_eri_read(tp, i*0x10 + 4, 4,
-                                                 ERIAR_MSIX));
-                len += snprintf(page + len, count - len,
-                                "%08x ",
-                                rtl8168_eri_read(tp, i*0x10 + 8, 4,
-                                                 ERIAR_MSIX));
-                len += snprintf(page + len, count - len,
-                                "%08x ",
-                                rtl8168_eri_read(tp, i*0x10 + 12, 4,
-                                                 ERIAR_MSIX));
-        }
-
-        rtnl_unlock();
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *eof = 1;
-
-        return len;
-}
-
-static int proc_dump_msix_tbl(char *page, char **start,
-                              off_t offset, int count,
-                              int *eof, void *data)
-{
-        int i, j;
-        int len = 0;
-        struct net_device *dev = data;
-        struct rtl8168_private *tp = netdev_priv(dev);
-
-        rtnl_lock();
-
-        len += snprintf(page + len, count - len,
-                        "\ndump MSI-X Table. Total Entry %d. \n",
-                        tp->hw_supp_irq_nvecs);
-
-        for (i=0; i<tp->hw_supp_irq_nvecs; i++) {
-                len += snprintf(page + len, count - len,
-                                "\n%04x ", i);
-                for (j=0; j<4; j++)
-                        len += snprintf(page + len, count - len, "%08x ",
-                                        rtl8168_eri_read(tp, i*0x10 + 4*j, 4,
-                                                         ERIAR_MSIX));
-        }
-
-        rtnl_unlock();
-
-        len += snprintf(page + len, count - len, "\n");
-
-        *eof = 1;
-        return 0;
-}
-#endif //LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
-
+#endif
 static void rtl8168_proc_module_init(void)
 {
         //create /proc/net/r8168
@@ -2819,11 +2200,7 @@ static void rtl8168_proc_module_init(void)
 static int rtl8168_proc_open(struct inode *inode, struct file *file)
 {
         struct net_device *dev = proc_get_parent_data(inode);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,17,0)
-        int (*show)(struct seq_file *, void *) = pde_data(inode);
-#else
         int (*show)(struct seq_file *, void *) = PDE_DATA(inode);
-#endif //LINUX_VERSION_CODE >= KERNEL_VERSION(5,17,0)
 
         return single_open(file, show, dev);
 }
@@ -2866,11 +2243,6 @@ static const struct rtl8168_proc_file rtl8168_proc_files[] = {
         { "eth_phy", &proc_get_eth_phy },
         { "ext_regs", &proc_get_extended_registers },
         { "pci_regs", &proc_get_pci_registers },
-        { "cdt", &proc_get_cable_info },
-        { "tx_desc", &proc_dump_tx_desc },
-        { "rx_desc", &proc_dump_rx_desc },
-        { "rx_desc_2", &proc_dump_rx_desc_2 },
-        { "msix_tbl", &proc_dump_msix_tbl },
         { "" }
 };
 
@@ -26958,8 +26330,13 @@ rtl8168_get_mac_address(struct net_device *dev)
         if (!is_valid_ether_addr(mac_addr)) {
                 netif_err(tp, probe, dev, "Invalid ether addr %pM\n",
                           mac_addr);
+#if defined(__VMKLNX__)
+                eth_hw_addr_random(dev);
+                ether_addr_copy(mac_addr, dev->dev_addr);
+#else
                 eth_random_addr(mac_addr);
                 dev->addr_assign_type = NET_ADDR_RANDOM;
+#endif
                 netif_info(tp, probe, dev, "Random ether addr %pM\n",
                            mac_addr);
                 tp->random_mac = 1;

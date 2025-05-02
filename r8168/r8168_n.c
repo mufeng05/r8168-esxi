@@ -1822,7 +1822,6 @@ static int proc_get_driver_variable(char *page, char **start,
                         "HwSuppMagicPktVer\t0x%x\n"
                         "HwSuppCheckPhyDisableModeVer\t0x%x\n"
                         "HwPkgDet\t0x%x\n"
-                        "HwSuppGigaForceMode\t0x%x\n"
                         "random_mac\t0x%x\n"
                         "org_mac_addr\t%pM\n"
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
@@ -1904,14 +1903,13 @@ static int proc_get_driver_variable(char *page, char **start,
                         aspm,
                         s5wol,
                         s5_keep_curr_mac,
-                        tp->eee_enabled,
+                        tp->eee.eee_enabled,
                         hwoptimize,
                         proc_init_num,
                         s0_magic_packet,
                         tp->HwSuppMagicPktVer,
                         tp->HwSuppCheckPhyDisableModeVer,
                         tp->HwPkgDet,
-                        tp->HwSuppGigaForceMode,
                         tp->random_mac,
                         tp->org_mac_addr,
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
@@ -31162,7 +31160,11 @@ rtl8168_rx_interrupt(struct net_device *dev,
                 skb_put(skb, pkt_size);
                 skb->protocol = eth_type_trans(skb, dev);
 
+#if defined (__VMKLNX__)
+                if (isMulticastType(skb->mhead))
+#else
                 if (skb->pkt_type == PACKET_MULTICAST)
+#endif 
                         RTLDEV->stats.multicast++;
 
                 if (rtl8168_rx_vlan_skb(tp, desc, skb) < 0)

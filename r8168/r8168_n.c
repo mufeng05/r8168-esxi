@@ -727,6 +727,11 @@ out:
 	return ret;
 }
 
+static inline
+__be16 get_protocol(struct sk_buff *skb);
+
+static bool rtl8168_skb_pad(struct sk_buff *skb);
+
 static inline bool
 rtl8168_tx_csum(struct sk_buff *skb,
                 struct net_device *dev,
@@ -1561,7 +1566,7 @@ static int proc_get_tally_counter(struct seq_file *m, void *v)
         seq_printf(m, "rx_broadcast\t%lld\n", le64_to_cpu(counters->rx_broadcast));
         seq_printf(m, "rx_multicast\t%lld\n", le64_to_cpu(counters->rx_multicast));
         seq_printf(m, "tx_aborted\t%lld\n", le64_to_cpu(counters->tx_aborted));
-        seq_printf(m, "tx_underun\t%lld\n", le64_to_cpu(counters->tx_underun));
+        seq_printf(m, "tx_underrun\t%lld\n", le64_to_cpu(counters->tx_underrun));
 
         seq_putc(m, '\n');
         return 0;
@@ -1963,7 +1968,7 @@ static int proc_get_tally_counter(char *page, char **start,
                         "rx_broadcast\t%lld\n"
                         "rx_multicast\t%lld\n"
                         "tx_aborted\t%lld\n"
-                        "tx_underun\t%lld\n",
+                        "tx_underrun\t%lld\n",
                         le64_to_cpu(counters->tx_packets),
                         le64_to_cpu(counters->rx_packets),
                         le64_to_cpu(counters->tx_errors),
@@ -1975,7 +1980,7 @@ static int proc_get_tally_counter(char *page, char **start,
                         le64_to_cpu(counters->rx_broadcast),
                         le64_to_cpu(counters->rx_multicast),
                         le64_to_cpu(counters->tx_aborted),
-                        le64_to_cpu(counters->tx_underun)
+                        le64_to_cpu(counters->tx_underrun)
                        );
 
         len += snprintf(page + len, count - len, "\n");

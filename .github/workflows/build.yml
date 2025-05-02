@@ -1,0 +1,38 @@
+name: Build
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+        image: "centos:7"
+
+    steps:
+
+    - name: Initialization environment
+      run: |
+            sed -i '/^#/! s|^mirrorlist=|#mirrorlist=|' /etc/yum.repos.d/CentOS-Base.repo
+            sed -i 's|^#baseurl=http://mirror.centos.org/centos/\$releasever/|baseurl=https://vault.centos.org/7.9.2009/|g' /etc/yum.repos.d/CentOS-Base.repo
+            yum update -y
+            yum install git -y
+            yum groupinstall "Development Tools" -y
+            git clone https://github.com/realganfan/compile-vmkdriver-env-builder.git
+            cd compile-vmkdriver-env-builder
+            bash build--esxi-driver-env-centos7.sh
+
+    - name: Checkout code
+      run: |
+            git clone https://github.com/mufeng05/r8168-esxi.git
+
+    - name: Copy files
+      run: |
+            cp ./r8168-esxi/build-script/build-r8168.sh /build/vmkdrivers-gpl/
+            cp -r ./r8168-esxi/r8168 /build/vmkdrivers-gpl/vmkdrivers/src_9/drivers/net
+
+    - name: Build
+      run: |
+            cd /build/vmkdrivers-gpl
+            bash build-r8168.sh
+    

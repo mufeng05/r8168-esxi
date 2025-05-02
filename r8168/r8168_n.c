@@ -427,6 +427,12 @@ MODULE_LICENSE("GPL");
 
 MODULE_VERSION(RTL8168_VERSION);
 
+//Redefine Linux kernel version
+#if defined(LINUX_VERSION_CODE) && defined(__VMKLNX__)
+#undef LINUX_VERSION_CODE
+#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
+#endif 
+
 static void rtl8168_sleep_rx_enable(struct net_device *dev);
 static void rtl8168_dsm(struct net_device *dev, int dev_state);
 

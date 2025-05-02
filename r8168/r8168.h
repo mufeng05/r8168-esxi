@@ -36,6 +36,12 @@
 #include "r8168_realwow.h"
 #include "r8168_fiber.h"
 
+//Redefine Linux kernel version
+#if defined(LINUX_VERSION_CODE) && defined(__VMKLNX__)
+#undef LINUX_VERSION_CODE
+#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
+#endif 
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 #define skb_transport_offset(skb) (skb->h.raw - skb->data)
 #endif

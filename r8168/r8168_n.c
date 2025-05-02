@@ -1746,11 +1746,19 @@ static int proc_get_driver_variable(char *page, char **start,
                         "chipset_name\t%s\n"
                         "mtu\t%d\n"
                         "NUM_RX_DESC\t0x%x\n"
-                        "cur_rx\t0x%x\n"
-                        "dirty_rx\t0x%x\n"
+                        "cur_rx0\t0x%x\n"
+                        "dirty_rx0\t0x%x\n"
+                        "cur_rx1\t0x%x\n"
+                        "dirty_rx1\t0x%x\n"
+                        "cur_rx2\t0x%x\n"
+                        "dirty_rx2\t0x%x\n"
+                        "cur_rx3\t0x%x\n"
+                        "dirty_rx3\t0x%x\n"
                         "NUM_TX_DESC\t0x%x\n"
-                        "cur_tx\t0x%x\n"
-                        "dirty_tx\t0x%x\n"
+                        "cur_tx0\t0x%x\n"
+                        "dirty_tx0\t0x%x\n"
+                        "cur_tx1\t0x%x\n"
+                        "dirty_tx1\t0x%x\n"
                         "rx_buf_sz\t0x%x\n"
                         "esd_flag\t0x%x\n"
                         "pci_cfg_is_read\t0x%x\n"
@@ -1827,11 +1835,19 @@ static int proc_get_driver_variable(char *page, char **start,
                         rtl_chip_info[tp->chipset].name,
                         dev->mtu,
                         NUM_RX_DESC,
-                        tp->cur_rx,
-                        tp->dirty_rx,
+                        tp->rx_ring[0].cur_rx,
+                        tp->rx_ring[0].dirty_rx,
+                        tp->rx_ring[1].cur_rx,
+                        tp->rx_ring[1].dirty_rx,
+                        tp->rx_ring[2].cur_rx,
+                        tp->rx_ring[2].dirty_rx,
+                        tp->rx_ring[3].cur_rx,
+                        tp->rx_ring[3].dirty_rx,
                         NUM_TX_DESC,
-                        tp->cur_tx,
-                        tp->dirty_tx,
+                        tp->tx_ring[0].cur_tx,
+                        tp->tx_ring[0].dirty_tx,
+                        tp->tx_ring[1].cur_tx,
+                        tp->tx_ring[1].dirty_tx,
                         tp->rx_buf_sz,
                         tp->esd_flag,
                         tp->pci_cfg_is_read,

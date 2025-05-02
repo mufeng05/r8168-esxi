@@ -568,6 +568,56 @@ MODULE_VERSION(RTL8168_VERSION);
 #undef LINUX_VERSION_CODE
 #define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 
+//EEE type backport
+/**
+ * ethtool_adv_to_mmd_eee_adv_t
+ * @adv: the ethtool advertisement settings
+ *
+ * A small helper function that translates ethtool advertisement settings
+ * to EEE advertisements for the MMD EEE Advertisement (7.60) and
+ * MMD EEE Link Partner Ability (7.61) registers.
+ */
+static inline u16 ethtool_adv_to_mmd_eee_adv_t(u32 adv)
+{
+	u16 reg = 0;
+
+	if (adv & ADVERTISED_100baseT_Full)
+		reg |= MDIO_EEE_100TX;
+	if (adv & ADVERTISED_1000baseT_Full)
+		reg |= MDIO_EEE_1000T;
+	if (adv & ADVERTISED_10000baseT_Full)
+		reg |= MDIO_EEE_10GT;
+	if (adv & ADVERTISED_1000baseKX_Full)
+		reg |= MDIO_EEE_1000KX;
+	if (adv & ADVERTISED_10000baseKX4_Full)
+		reg |= MDIO_EEE_10GKX4;
+	if (adv & ADVERTISED_10000baseKR_Full)
+		reg |= MDIO_EEE_10GKR;
+
+	return reg;
+}
+
+
+static inline u32 mmd_eee_adv_to_ethtool_adv_t(u16 eee_adv)
+{
+	u32 adv = 0;
+
+	if (eee_adv & MDIO_EEE_100TX)
+		adv |= ADVERTISED_100baseT_Full;
+	if (eee_adv & MDIO_EEE_1000T)
+		adv |= ADVERTISED_1000baseT_Full;
+	if (eee_adv & MDIO_EEE_10GT)
+		adv |= ADVERTISED_10000baseT_Full;
+	if (eee_adv & MDIO_EEE_1000KX)
+		adv |= ADVERTISED_1000baseKX_Full;
+	if (eee_adv & MDIO_EEE_10GKX4)
+		adv |= ADVERTISED_10000baseKX4_Full;
+	if (eee_adv & MDIO_EEE_10GKR)
+		adv |= ADVERTISED_10000baseKR_Full;
+
+	return adv;
+}
+
 //Checksum offloading backport.
 unsigned int skb_checksum(const struct sk_buff *skb, int offset,
         int len, unsigned int csum)
@@ -998,7 +1048,7 @@ static inline u32 netif_msg_init(int debug_value, int default_msg_enable_bits)
 
 #endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,5)
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22) && !defined(__VMKLNX__)
 static inline void eth_copy_and_sum (struct sk_buff *dest,
                                      const unsigned char *src,
                                      int len, int base)
@@ -8113,7 +8163,11 @@ out:
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,6,0) */
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,4,22)
+#if defined(__VMKLNX__)
+static struct ethtool_ops rtl8168_ethtool_ops = {
+#else
 static const struct ethtool_ops rtl8168_ethtool_ops = {
+#endif
         .get_drvinfo        = rtl8168_get_drvinfo,
         .get_regs_len       = rtl8168_get_regs_len,
         .get_link           = ethtool_op_get_link,
@@ -32154,12 +32208,16 @@ static void rtl8168_shutdown(struct pci_dev *pdev)
 
         rtnl_unlock();
 
+//ESXi VMKernel hasn't global var system_state
+#if !defined(__VMKLNX__)
         if (system_state == SYSTEM_POWER_OFF) {
                 pci_clear_master(tp->pci_dev);
                 rtl8168_sleep_rx_enable(dev);
                 pci_wake_from_d3(pdev, tp->wol_enabled);
                 pci_set_power_state(pdev, PCI_D3hot);
         }
+#endif
+
 }
 #endif
 

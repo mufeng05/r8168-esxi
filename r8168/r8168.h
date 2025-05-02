@@ -62,7 +62,7 @@ typedef int netdev_tx_t;
 #define skb_transport_offset(skb) (skb->h.raw - skb->data)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26) && !defined (__VMKLNX__)
 #define device_set_wakeup_enable(dev, val)	do {} while (0)
 #endif
 
@@ -1083,6 +1083,46 @@ struct _kc_ethtool_pauseparam {
 #endif
 
 /*****************************************************************************/
+
+#if defined(__VMKLNX__)
+/**
+ * struct ethtool_eee - Energy Efficient Ethernet information
+ * @cmd: ETHTOOL_{G,S}EEE
+ * @supported: Mask of %SUPPORTED_* flags for the speed/duplex combinations
+ *	for which there is EEE support.
+ * @advertised: Mask of %ADVERTISED_* flags for the speed/duplex combinations
+ *	advertised as eee capable.
+ * @lp_advertised: Mask of %ADVERTISED_* flags for the speed/duplex
+ *	combinations advertised by the link partner as eee capable.
+ * @eee_active: Result of the eee auto negotiation.
+ * @eee_enabled: EEE configured mode (enabled/disabled).
+ * @tx_lpi_enabled: Whether the interface should assert its tx lpi, given
+ *	that eee was negotiated.
+ * @tx_lpi_timer: Time in microseconds the interface delays prior to asserting
+ *	its tx lpi (after reaching 'idle' state). Effective only when eee
+ *	was negotiated and tx_lpi_enabled was set.
+ */
+struct ethtool_eee {
+	__u32	cmd;
+	__u32	supported;
+	__u32	advertised;
+	__u32	lp_advertised;
+	__u32	eee_active;
+	__u32	eee_enabled;
+	__u32	tx_lpi_enabled;
+	__u32	tx_lpi_timer;
+	__u32	reserved[2];
+};
+
+#define MDIO_EEE_10GT		0x0008	/* 10GT EEE cap */
+#define MDIO_EEE_1000KX		0x0010	/* 1000KX EEE cap */
+#define MDIO_EEE_10GKX4		0x0020	/* 10G KX4 EEE cap */
+#define MDIO_EEE_10GKR		0x0040	/* 10G KR EEE cap */
+
+
+
+
+#endif //#if defined(__VMKLNX__)
 
 enum RTL8168_DSM_STATE {
         DSM_MAC_INIT = 1,

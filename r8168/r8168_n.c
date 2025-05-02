@@ -502,7 +502,11 @@ module_param(aspm, int, 0);
 MODULE_PARM_DESC(aspm, "Enable ASPM.");
 
 module_param(dynamic_aspm, int, 0);
+#if defined(__VMKLNX__)
+MODULE_PARM_DESC(dynamic_aspm, "Enable Software Dynamic ASPM.");
+#else
 MODULE_PARM_DESC(aspm, "Enable Software Dynamic ASPM.");
+#endif
 
 module_param(s5wol, int, 0);
 MODULE_PARM_DESC(s5wol, "Enable Shutdown Wake On Lan.");

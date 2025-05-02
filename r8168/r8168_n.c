@@ -1416,7 +1416,7 @@ static int proc_get_driver_variable(struct seq_file *m, void *v)
 
         seq_puts(m, "\nDump Driver Variable\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         seq_puts(m, "Variable\tValue\n----------\t-----\n");
         seq_printf(m, "MODULENAME\t%s\n", MODULENAME);
         seq_printf(m, "driver version\t%s\n", RTL8168_VERSION);
@@ -1424,11 +1424,19 @@ static int proc_get_driver_variable(struct seq_file *m, void *v)
         seq_printf(m, "chipset_name\t%s\n", rtl_chip_info[tp->chipset].name);
         seq_printf(m, "mtu\t%d\n", dev->mtu);
         seq_printf(m, "NUM_RX_DESC\t0x%x\n", NUM_RX_DESC);
-        seq_printf(m, "cur_rx\t0x%x\n", tp->cur_rx);
-        seq_printf(m, "dirty_rx\t0x%x\n", tp->dirty_rx);
+        seq_printf(m, "cur_rx0\t0x%x\n", tp->rx_ring[0].cur_rx);
+        seq_printf(m, "dirty_rx0\t0x%x\n", tp->rx_ring[0].dirty_rx);
+        seq_printf(m, "cur_rx1\t0x%x\n", tp->rx_ring[1].cur_rx);
+        seq_printf(m, "dirty_rx1\t0x%x\n", tp->rx_ring[1].dirty_rx);
+        seq_printf(m, "cur_rx2\t0x%x\n", tp->rx_ring[2].cur_rx);
+        seq_printf(m, "dirty_rx2\t0x%x\n", tp->rx_ring[2].dirty_rx);
+        seq_printf(m, "cur_rx3\t0x%x\n", tp->rx_ring[3].cur_rx);
+        seq_printf(m, "dirty_rx3\t0x%x\n", tp->rx_ring[3].dirty_rx);
         seq_printf(m, "NUM_TX_DESC\t0x%x\n", NUM_TX_DESC);
-        seq_printf(m, "cur_tx\t0x%x\n", tp->cur_tx);
-        seq_printf(m, "dirty_tx\t0x%x\n", tp->dirty_tx);
+        seq_printf(m, "cur_tx0\t0x%x\n", tp->tx_ring[0].cur_tx);
+        seq_printf(m, "dirty_tx0\t0x%x\n", tp->tx_ring[0].dirty_tx);
+        seq_printf(m, "cur_tx1\t0x%x\n", tp->tx_ring[1].cur_tx);
+        seq_printf(m, "dirty_tx1\t0x%x\n", tp->tx_ring[1].dirty_tx);
         seq_printf(m, "rx_buf_sz\t0x%x\n", tp->rx_buf_sz);
         seq_printf(m, "esd_flag\t0x%x\n", tp->esd_flag);
         seq_printf(m, "pci_cfg_is_read\t0x%x\n", tp->pci_cfg_is_read);
@@ -1485,21 +1493,20 @@ static int proc_get_driver_variable(struct seq_file *m, void *v)
         seq_printf(m, "aspm\t0x%x\n", aspm);
         seq_printf(m, "s5wol\t0x%x\n", s5wol);
         seq_printf(m, "s5_keep_curr_mac\t0x%x\n", s5_keep_curr_mac);
-        seq_printf(m, "eee_enable\t0x%x\n", tp->eee_enabled);
+        seq_printf(m, "eee_enable\t0x%x\n", tp->eee.eee_enabled);
         seq_printf(m, "hwoptimize\t0x%lx\n", hwoptimize);
         seq_printf(m, "proc_init_num\t0x%x\n", proc_init_num);
         seq_printf(m, "s0_magic_packet\t0x%x\n", s0_magic_packet);
         seq_printf(m, "HwSuppMagicPktVer\t0x%x\n", tp->HwSuppMagicPktVer);
         seq_printf(m, "HwSuppCheckPhyDisableModeVer\t0x%x\n", tp->HwSuppCheckPhyDisableModeVer);
         seq_printf(m, "HwPkgDet\t0x%x\n", tp->HwPkgDet);
-        seq_printf(m, "HwSuppGigaForceMode\t0x%x\n", tp->HwSuppGigaForceMode);
         seq_printf(m, "random_mac\t0x%x\n", tp->random_mac);
         seq_printf(m, "org_mac_addr\t%pM\n", tp->org_mac_addr);
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,13)
         seq_printf(m, "perm_addr\t%pM\n", dev->perm_addr);
 #endif
         seq_printf(m, "dev_addr\t%pM\n", dev->dev_addr);
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_putc(m, '\n');
         return 0;
@@ -1526,7 +1533,7 @@ static int proc_get_tally_counter(struct seq_file *m, void *v)
                 return 0;
         }
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         RTL_W32(tp, CounterAddrHigh, (u64)paddr >> 32);
         cmd = (u64)paddr & DMA_BIT_MASK(32);
         RTL_W32(tp, CounterAddrLow, cmd);
@@ -1540,7 +1547,7 @@ static int proc_get_tally_counter(struct seq_file *m, void *v)
                 if (WaitCnt > 20)
                         break;
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_puts(m, "Statistics\tValue\n----------\t-----\n");
         seq_printf(m, "tx_packets\t%lld\n", le64_to_cpu(counters->tx_packets));
@@ -1572,7 +1579,7 @@ static int proc_get_registers(struct seq_file *m, void *v)
         seq_puts(m, "\nDump MAC Registers\n");
         seq_puts(m, "Offset\tValue\n------\t-----\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%02x:\t", n);
 
@@ -1581,7 +1588,7 @@ static int proc_get_registers(struct seq_file *m, void *v)
                         seq_printf(m, "%02x ", byte_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_putc(m, '\n');
         return 0;
@@ -1598,7 +1605,7 @@ static int proc_get_pcie_phy(struct seq_file *m, void *v)
         seq_puts(m, "\nDump PCIE PHY\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%02x:\t", n);
 
@@ -1607,7 +1614,7 @@ static int proc_get_pcie_phy(struct seq_file *m, void *v)
                         seq_printf(m, "%04x ", word_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_putc(m, '\n');
         return 0;
@@ -1624,7 +1631,7 @@ static int proc_get_eth_phy(struct seq_file *m, void *v)
         seq_puts(m, "\nDump Ethernet PHY\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         seq_puts(m, "\n####################page 0##################\n ");
         rtl8168_mdio_write(tp, 0x1f, 0x0000);
         for (n = 0; n < max;) {
@@ -1635,7 +1642,7 @@ static int proc_get_eth_phy(struct seq_file *m, void *v)
                         seq_printf(m, "%04x ", word_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_putc(m, '\n');
         return 0;
@@ -1661,7 +1668,7 @@ static int proc_get_extended_registers(struct seq_file *m, void *v)
         seq_puts(m, "\nDump Extended Registers\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%02x:\t", n);
 
@@ -1670,7 +1677,7 @@ static int proc_get_extended_registers(struct seq_file *m, void *v)
                         seq_printf(m, "%08x ", dword_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_putc(m, '\n');
         return 0;
@@ -1687,7 +1694,7 @@ static int proc_get_pci_registers(struct seq_file *m, void *v)
         seq_puts(m, "\nDump PCI Registers\n");
         seq_puts(m, "\nOffset\tValue\n------\t-----\n ");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 seq_printf(m, "\n0x%03x:\t", n);
 
@@ -1704,7 +1711,7 @@ static int proc_get_pci_registers(struct seq_file *m, void *v)
         pci_read_config_dword(tp->pci_dev, n, &dword_rd);
         seq_printf(m, "\n0x%03x:\t%08x ", n, dword_rd);
 
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         seq_putc(m, '\n');
         return 0;
@@ -1723,7 +1730,7 @@ static int proc_get_driver_variable(char *page, char **start,
         len += snprintf(page + len, count - len,
                         "\nDump Driver Driver\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         len += snprintf(page + len, count - len,
                         "Variable\tValue\n----------\t-----\n");
 
@@ -1891,7 +1898,7 @@ static int proc_get_driver_variable(char *page, char **start,
 #endif
                         dev->dev_addr
                        );
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -1925,7 +1932,7 @@ static int proc_get_tally_counter(char *page, char **start,
                 goto out;
         }
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         RTL_W32(tp, CounterAddrHigh, (u64)paddr >> 32);
         cmd = (u64)paddr & DMA_BIT_MASK(32);
         RTL_W32(tp, CounterAddrLow, cmd);
@@ -1939,7 +1946,7 @@ static int proc_get_tally_counter(char *page, char **start,
                 if (WaitCnt > 20)
                         break;
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len,
                         "Statistics\tValue\n----------\t-----\n");
@@ -1993,7 +2000,7 @@ static int proc_get_registers(char *page, char **start,
                         "\nDump MAC Registers\n"
                         "Offset\tValue\n------\t-----\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%02x:\t",
@@ -2006,7 +2013,7 @@ static int proc_get_registers(char *page, char **start,
                                         byte_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2029,7 +2036,7 @@ static int proc_get_pcie_phy(char *page, char **start,
                         "\nDump PCIE PHY\n"
                         "Offset\tValue\n------\t-----\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%02x:\t",
@@ -2042,7 +2049,7 @@ static int proc_get_pcie_phy(char *page, char **start,
                                         word_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2065,7 +2072,7 @@ static int proc_get_eth_phy(char *page, char **start,
                         "\nDump Ethernet PHY\n"
                         "Offset\tValue\n------\t-----\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         len += snprintf(page + len, count - len,
                         "\n####################page 0##################\n");
         rtl8168_mdio_write(tp, 0x1f, 0x0000);
@@ -2081,7 +2088,7 @@ static int proc_get_eth_phy(char *page, char **start,
                                         word_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len, "\n");
 
@@ -2115,7 +2122,7 @@ static int proc_get_extended_registers(char *page, char **start,
                         "\nDump Extended Registers\n"
                         "Offset\tValue\n------\t-----\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%02x:\t",
@@ -2128,7 +2135,7 @@ static int proc_get_extended_registers(char *page, char **start,
                                         dword_rd);
                 }
         }
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len, "\n");
 out:
@@ -2151,7 +2158,7 @@ static int proc_get_pci_registers(char *page, char **start,
                         "\nDump PCI Registers\n"
                         "Offset\tValue\n------\t-----\n");
 
-        spin_lock_irqsave(&tp->lock, flags);
+        rtnl_lock();
         for (n = 0; n < max;) {
                 len += snprintf(page + len, count - len,
                                 "\n0x%03x:\t",
@@ -2177,7 +2184,7 @@ static int proc_get_pci_registers(char *page, char **start,
                         "\n0x%03x:\t%08x ",
                         n,
                         dword_rd);
-        spin_unlock_irqrestore(&tp->lock, flags);
+        rtnl_unlock();
 
         len += snprintf(page + len, count - len, "\n");
 

@@ -7163,6 +7163,7 @@ static int rtl8168_set_features(struct net_device *dev,
 
 #endif
 
+#ifdef ETH_TP_MDI_X
 static u8 rtl8168_get_mdi_status(struct rtl8168_private *tp)
 {
         u32 val;
@@ -7188,6 +7189,7 @@ static u8 rtl8168_get_mdi_status(struct rtl8168_private *tp)
                         return ETH_TP_MDI_X;
         };
 }
+#endif
 
 static void rtl8168_gset_xmii(struct net_device *dev,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0)
@@ -7285,7 +7287,9 @@ static void rtl8168_gset_xmii(struct net_device *dev,
         cmd->speed = speed;
         cmd->duplex = duplex;
         cmd->port = PORT_TP;
+#ifdef ETH_TP_MDI_X
         cmd->eth_tp_mdix = rtl8168_get_mdi_status(tp);
+#endif
 #else
         ethtool_convert_legacy_u32_to_link_mode(cmd->link_modes.supported,
                                                 supported);
@@ -7297,7 +7301,9 @@ static void rtl8168_gset_xmii(struct net_device *dev,
         cmd->base.speed = speed;
         cmd->base.duplex = duplex;
         cmd->base.port = PORT_TP;
+#ifdef ETH_TP_MDI_X
         cmd->base.eth_tp_mdix = rtl8168_get_mdi_status(tp);
+#endif
 #endif
 }
 

@@ -15,7 +15,7 @@ jobs:
     
     - name: Initialization environment
       run: |
-            docker exec centos7 sh -c "
+            docker exec centos7 bash -c "
             sed -i '/^#/! s|^mirrorlist=|#mirrorlist=|' /etc/yum.repos.d/CentOS-Base.repo
             sed -i 's|^#baseurl=http://mirror.centos.org/centos/\$releasever/|baseurl=https://vault.centos.org/7.9.2009/|g' /etc/yum.repos.d/CentOS-Base.repo
             yum update -y
@@ -34,20 +34,20 @@ jobs:
 
     - name: Checkout code
       run: |
-            docker exec centos7 sh -c "
+            docker exec centos7 bash -c "
             git clone https://github.com/mufeng05/r8168-esxi.git
             "
 
     - name: Copy files
       run: |
-            docker exec centos7 sh -c "
+            docker exec centos7 bash -c "
             cp ./r8168-esxi/build-script/build-r8168.sh /build/vmkdrivers-gpl/
             cp -r ./r8168-esxi/r8168 /build/vmkdrivers-gpl/vmkdrivers/src_9/drivers/net
             "
 
     - name: Build
       run: |
-            docker exec centos7 sh -c "
+            docker exec centos7 bash -c "
             cd /build/vmkdrivers-gpl
             bash build-r8168.sh
             "

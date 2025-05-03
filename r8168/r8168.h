@@ -79,14 +79,6 @@
 #define MDIO_EEE_10GKR		0x0040	/* 10G KR EEE cap */
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3,6,0) */
 
-/* MDI or MDI-X status/control - if MDI/MDI_X/AUTO is set then
- * the driver is required to renegotiate link
- */
-#define ETH_TP_MDI_INVALID	0x00 /* status: unknown; control: unsupported */
-#define ETH_TP_MDI		0x01 /* status: MDI;     control: force MDI */
-#define ETH_TP_MDI_X		0x02 /* status: MDI-X;   control: force MDI-X */
-#define ETH_TP_MDI_AUTO		0x03 /*                  control: auto-select */
-
 static inline u32 mmd_eee_adv_to_ethtool_adv_t(u16 eee_adv)
 {
         u32 adv = 0;

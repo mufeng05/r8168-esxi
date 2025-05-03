@@ -3385,7 +3385,6 @@ typedef u32 netdev_features_t;
 #undef PCI_EXP_TYPE_RC_EC
 #define  PCI_EXP_TYPE_RC_EC	0xa	/* Root Complex Event Collector */
 #ifndef CONFIG_BQL
-#define netdev_tx_completed_queue(_q, _p, _b) do {} while (0)
 #define netdev_sent_queue(_n, _b) do {} while (0)
 #define netdev_reset_queue(_n) do {} while (0)
 #endif

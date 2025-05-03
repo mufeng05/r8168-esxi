@@ -31,5 +31,5 @@ jobs:
       uses: actions/upload-artifact@main
       with:
         name: vib-8168
-        path: /build
+        path: /vib-r8168
     

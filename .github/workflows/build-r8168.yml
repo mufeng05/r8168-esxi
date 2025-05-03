@@ -14,9 +14,9 @@ jobs:
 
     - name: Copy files
       run: |
-            cp -r ./build /
-            cp ./build-script/build-r8168.sh /build/vmkdrivers-gpl/
-            cp -r ./r8168 /build/vmkdrivers-gpl/vmkdrivers/src_9/drivers/net
+            sudo cp -r ./build /
+            sudo cp ./build-script/build-r8168.sh /build/vmkdrivers-gpl/
+            sudo cp -r ./r8168 /build/vmkdrivers-gpl/vmkdrivers/src_9/drivers/net
 
     - name: Run centos7
       run: |

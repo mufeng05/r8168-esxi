@@ -1,0 +1,5 @@
+regtype=linux,bus=pci,id=10ec:8168 0000:0000,driver=r8168,class=network
+regtype=linux,bus=pci,id=10ec:8161 0000:0000,driver=r8168,class=network
+regtype=linux,bus=pci,id=10ec:2502 0000:0000,driver=r8168,class=network
+regtype=linux,bus=pci,id=10ec:2600 0000:0000,driver=r8168,class=network
+regtype=linux,bus=pci,id=1186:4300 0000:0000,driver=r8168,class=network

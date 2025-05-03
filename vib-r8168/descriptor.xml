@@ -18,7 +18,7 @@
       <constraint name="net51-drivers"/>
     </conflicts>
     <replaces>
-      <constraint name="net55-r8168"/>
+      <constraint name="net-r8168"/>
     </replaces>
     <provides/>
     <compatibleWith/>

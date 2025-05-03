@@ -32686,9 +32686,9 @@ out:
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29)
         pci_enable_wake(pdev, pci_choose_state(pdev, state), tp->wol_enabled);
 #endif
-
+#if !defined(__VMKLNX__)
         pci_prepare_to_sleep(pdev);
-
+#endif
         return 0;
 }
 

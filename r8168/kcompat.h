@@ -2766,15 +2766,6 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 #define netdev_name(netdev)	_kc_netdev_name(netdev)
 #endif /* netdev_name */
 
-#undef netdev_printk
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
-#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
-#else /* 2.6.21 => 2.6.34 */
-#define netdev_printk(level, netdev, format, args...)		\
-	dev_printk(level, (netdev)->dev.parent,			\
-		   "%s: " format,				\
-		   netdev_name(netdev), ##args)
-#endif /* <2.6.0 <2.6.21 <2.6.34 */
 #undef netdev_emerg
 #define netdev_emerg(dev, format, args...)			\
 	netdev_printk(KERN_EMERG, dev, format, ##args)

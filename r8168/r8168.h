@@ -48,6 +48,9 @@
 #define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 #endif 
 
+#undef usleep_range
+#define usleep_range(min, max)	msleep(DIV_ROUND_UP(min, 1000))
+
 /*
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)&& !defined(ENABLE_LIB_SUPPORT)
 #define RTL_USE_NEW_INTR_API

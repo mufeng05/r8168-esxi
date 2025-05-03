@@ -11,19 +11,20 @@ jobs:
 
     - name: Run centos7
       run: |
-            docker run -itd -v /build:/build --name centos7 --net="host" centos:7 /bin/bash
+            docker run -itd -v /build:/build --name centos7 centos:7 bash
     
     - name: Initialization environment
       run: |
-            script -q -c "docker exec -it centos7 /bin/bash" /dev/null
+            docker exec centos7 sh -c "
             sed -i '/^#/! s|^mirrorlist=|#mirrorlist=|' /etc/yum.repos.d/CentOS-Base.repo
             sed -i 's|^#baseurl=http://mirror.centos.org/centos/\$releasever/|baseurl=https://vault.centos.org/7.9.2009/|g' /etc/yum.repos.d/CentOS-Base.repo
             yum update -y
             yum install git -y
-            yum groupinstall "Development Tools" -y
+            yum groupinstall 'Development Tools' -y
             git clone https://github.com/realganfan/compile-vmkdriver-env-builder.git
             cd compile-vmkdriver-env-builder
             bash build--esxi-driver-env-centos7.sh
+            "
 
     - name: Checkout code
       run: |

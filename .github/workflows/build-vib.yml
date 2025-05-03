@@ -14,7 +14,7 @@ jobs:
 
     - name: Copy files
       run: |
-            sudo cp -r ./build/vib-r8168-8.052.01 /build
+            sudo cp -r ./build/vib-r8168 /build
 
     - name: Run vibauthor
       run: |
@@ -24,12 +24,12 @@ jobs:
       run: |
             docker exec vibauthor bash -c "
             cd /build
-            vibauthor -C -t ./vib-8168-8.052.01 --force
+            vibauthor -C -t ./vib-8168 --force
             "
     
     - name: Upload vib
       uses: actions/upload-artifact@main
       with:
-        name: r8168-vib
+        name: vib-8168
         path: /build
     

@@ -6,11 +6,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-        image: "centos:7"
 
     steps:
 
+    - name: Run centos7
+      run: |
+        docker run -itd -v /build:/build --name centos7 --net="host" centos:7 /bin/bash
+    
     - name: Initialization environment
       run: |
             sed -i '/^#/! s|^mirrorlist=|#mirrorlist=|' /etc/yum.repos.d/CentOS-Base.repo
@@ -35,4 +37,11 @@ jobs:
       run: |
             cd /build/vmkdrivers-gpl
             bash build-r8168.sh
+            exit
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@main
+      with:
+        name: build
+        path: /build
     

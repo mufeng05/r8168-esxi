@@ -18,12 +18,12 @@ jobs:
 
     - name: Run vibauthor
       run: |
-            docker run -itd -v /vib-r8168:/vib-r8168 --name vibauthor lamw/vibauthor bash
+            docker run --rm -itd -v /vib-r8168:/vib-r8168 --name vibauthor lamw/vibauthor bash
 
     - name: Build
       run: |
             docker exec vibauthor bash -c "
-            vibauthor -C -t /vib-8168 --force
+            vibauthor -C -t /vib-8168
             "
     
     - name: Upload vib

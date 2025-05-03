@@ -14,7 +14,7 @@ jobs:
 
     - name: Copy files
       run: |
-            sudo cp -r ./build/vib-r8168 /vib-r8168
+            sudo cp -r ./vib-r8168 /vib-r8168
 
     - name: Run vibauthor
       run: |
@@ -24,6 +24,7 @@ jobs:
       run: |
             docker exec vibauthor bash -c "
             cd /
+            ls -la
             vibauthor -C -t ./vib-8168 --force
             "
     

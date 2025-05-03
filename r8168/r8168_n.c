@@ -31297,7 +31297,7 @@ static void rtl8168_reset_task(struct work_struct *work)
             !test_and_clear_bit(R8168_FLAG_TASK_RESET_PENDING, tp->task_flags))
                 goto out_unlock;
 
-        netdev_err(dev, "Device reseting!\n");
+        //netdev_err(dev, "Device reseting!\n");
 
         netif_carrier_off(dev);
         netif_tx_disable(dev);
@@ -31413,7 +31413,7 @@ rtl8168_tx_timeout(struct net_device *dev)
 {
         struct rtl8168_private *tp = netdev_priv(dev);
 
-        netdev_err(dev, "Transmit timeout reset Device!\n");
+        //netdev_err(dev, "Transmit timeout reset Device!\n");
 
         /* Let's wait a bit while any (async) irq lands on */
         rtl8168_schedule_reset_work(tp);

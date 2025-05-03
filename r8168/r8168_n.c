@@ -27185,7 +27185,9 @@ rtl8168_release_board(struct pci_dev *pdev,
 
         if (tp->pdev_cmac) {
                 iounmap(tp->cmac_ioaddr);
+#if !defined(__VMKLNX__)
                 pci_clear_master(tp->pdev_cmac);
+#endif
                 pci_release_regions(tp->pdev_cmac);
                 pci_disable_device(tp->pdev_cmac);
                 tp->pdev_cmac = NULL;
@@ -32522,9 +32524,9 @@ int rtl8168_close(struct net_device *dev)
                 set_bit(R8168_FLAG_DOWN, tp->task_flags);
 
                 rtl8168_down(dev);
-
+#if !defined(__VMKLNX__)
                 pci_clear_master(tp->pci_dev);
-
+#endif
                 rtl8168_hw_d3_para(dev);
 
                 rtl8168_powerdown_pll(dev);
@@ -32655,9 +32657,9 @@ rtl8168_suspend(struct pci_dev *pdev, pm_message_t state)
         rtl8168_dsm(dev, DSM_NIC_GOTO_D3);
 
         rtl8168_hw_reset(dev);
-
+#if !defined(__VMKLNX__)
         pci_clear_master(pdev);
-
+#endif
         rtl8168_hw_d3_para(dev);
 
 #ifdef ENABLE_FIBER_SUPPORT

@@ -23,8 +23,7 @@ jobs:
     - name: Build
       run: |
             docker exec vibauthor bash -c "
-            cd /
-            vibauthor -C -t ./vib-8168 --force
+            vibauthor -C -t /vib-8168 --force
             "
     
     - name: Upload vib

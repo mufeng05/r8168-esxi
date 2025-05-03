@@ -25,12 +25,12 @@ jobs:
       run: |
             docker exec vibauthor bash -c "
             cd /build
-            vibauthor -C -t vib-8168 -v r8168.vib -O r8168-offline-bundle.zip -f
+            vibauthor -C -t vib-r8168 -v r8168.vib -O r8168-offline-bundle.zip -f
             "
     
     - name: Upload vib
       uses: actions/upload-artifact@main
       with:
-        name: vib-8168
+        name: vib-r8168
         path: /build
     

@@ -1,7 +1,7 @@
 <vib version="5.0">
   <type>bootbank</type>
   <name>net-r8168</name>
-  <version>8.052.01-0</version>
+  <version>8.052.01-1</version>
   <vendor>Realtek</vendor>
   <summary>Realtek 8168 driver for ESXI</summary>
   <description>Recent driver for Realtek R8168. Based on official Realtek driver</description>

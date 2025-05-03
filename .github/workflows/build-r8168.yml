@@ -32,5 +32,6 @@ jobs:
     - name: Upload r8168
       uses: actions/upload-artifact@main
       with:
+        name: r8168
         path: /build/vmkdrivers-gpl/r8168
     

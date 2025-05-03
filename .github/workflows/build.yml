@@ -26,11 +26,11 @@ jobs:
             bash build--esxi-driver-env-centos7.sh
             "
 
-    - name: Upload artifacts
+    - name: Upload toolchain
       uses: actions/upload-artifact@main
       with:
-        name: original-build
-        path: /build
+        name: toolchain
+        path: /build/toolchain/lin64
 
     - name: Checkout code
       run: |

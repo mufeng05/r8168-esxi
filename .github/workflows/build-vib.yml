@@ -14,7 +14,7 @@ jobs:
 
     - name: Copy files
       run: |
-            sudo cp -r ./build/vib-r8168 /build
+            sudo cp -r ./build/vib-r8168 /build/vib-r8168
 
     - name: Run vibauthor
       run: |

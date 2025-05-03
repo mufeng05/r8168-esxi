@@ -1,11 +1,11 @@
 <vib version="5.0">
   <type>bootbank</type>
   <name>net55-r8168</name>
-  <version>8.052.01-1</version>
+  <version>8.055.00-1</version>
   <vendor>Realtek</vendor>
   <summary>Realtek 8168 driver for ESXI</summary>
   <description>Recent driver for Realtek R8168. Based on official Realtek driver</description>
-  <release-date>2025-05-03T12:00:00+08:00</release-date>
+  <release-date>2025-05-03T20:00:00+08:00</release-date>
   <urls>
     <url key="qwq">qwq</url>
   </urls>
@@ -14,7 +14,7 @@
       <constraint name="vmkapi_2_3_0_0"/>
       <constraint name="com.vmware.driverAPI-9.2.2.0"/>
     </depends>
-	<conflicts>
+	  <conflicts>
       <constraint name="net51-drivers"/>
     </conflicts>
     <replaces>

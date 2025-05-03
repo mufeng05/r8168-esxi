@@ -2766,50 +2766,6 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 #define netdev_name(netdev)	_kc_netdev_name(netdev)
 #endif /* netdev_name */
 
-#undef netdev_emerg
-#define netdev_emerg(dev, format, args...)			\
-	netdev_printk(KERN_EMERG, dev, format, ##args)
-#undef netdev_alert
-#define netdev_alert(dev, format, args...)			\
-	netdev_printk(KERN_ALERT, dev, format, ##args)
-#undef netdev_crit
-#define netdev_crit(dev, format, args...)			\
-	netdev_printk(KERN_CRIT, dev, format, ##args)
-#undef netdev_err
-#define netdev_err(dev, format, args...)			\
-	netdev_printk(KERN_ERR, dev, format, ##args)
-#undef netdev_warn
-#define netdev_warn(dev, format, args...)			\
-	netdev_printk(KERN_WARNING, dev, format, ##args)
-#undef netdev_notice
-#define netdev_notice(dev, format, args...)			\
-	netdev_printk(KERN_NOTICE, dev, format, ##args)
-#undef netdev_info
-#define netdev_info(dev, format, args...)			\
-	netdev_printk(KERN_INFO, dev, format, ##args)
-#undef netdev_dbg
-#if   defined(CONFIG_DYNAMIC_DEBUG)
-#define netdev_dbg(__dev, format, args...)			\
-do {								\
-	dynamic_dev_dbg((__dev)->dev.parent, "%s: " format,	\
-			netdev_name(__dev), ##args);		\
-} while (0)
-#else /* DEBUG */
-#define netdev_dbg(__dev, format, args...)			\
-({								\
-	if (0)							\
-		netdev_printk(KERN_DEBUG, __dev, format, ##args); \
-	0;							\
-})
-#endif /* DEBUG */
-
-#undef netif_printk
-#define netif_printk(priv, type, level, dev, fmt, args...)	\
-do {								\
-	if (netif_msg_##type(priv))				\
-		netdev_printk(level, (dev), fmt, ##args);	\
-} while (0)
-
 #undef netif_emerg
 #define netif_emerg(priv, type, dev, fmt, args...)		\
 	netif_level(emerg, priv, type, dev, fmt, ##args)

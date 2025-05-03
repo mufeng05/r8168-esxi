@@ -14,7 +14,7 @@ CC=/build/toolchain/lin64/gcc-4.8.0/bin/x86_64-linux-gcc
 LD=/build/toolchain/lin64/binutils-2.22/bin/x86_64-linux-ld
 
 # ENABLE_USE_FIRMWARE_FILE
-CONFIG_FLAGS="-DCONFIG_SOC_LAN -DCONFIG_R8168_VLAN -DCONFIG_R8168_NAPI -DENABLE_RSS_SUPPORT"
+CONFIG_FLAGS="-DCONFIG_SOC_LAN -DCONFIG_R8168_VLAN -DCONFIG_R8168_NAPI"
  
 # PR# 976913 requested that OSS binaries be stripped of debug
 LD_OPTS=--strip-debug
@@ -77,10 +77,6 @@ $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     vmkdrivers/src_9/drivers/net/r8168/r8168_asf.c
 
 $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
-    -o BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_rss.o \
-    vmkdrivers/src_9/drivers/net/r8168/r8168_rss.c
-
-$CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     -o BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.o \
     vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.c
 
@@ -96,7 +92,6 @@ $LD $LD_OPTS -r -o BLD/build/vmkdriver-r8168/release/vmkernel64/r8168 \
     --whole-archive \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_n.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_asf.o \
-    BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_rss.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtltool.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_92/common/vmklinux_module.o

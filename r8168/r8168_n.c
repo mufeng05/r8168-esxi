@@ -575,6 +575,8 @@ MODULE_VERSION(RTL8168_VERSION);
 
 #if defined(__VMKLNX__)
 
+#include <linux/log2.h>
+
 #undef LINUX_VERSION_CODE
 #define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 

@@ -721,68 +721,6 @@ free_skb:
 	return -ENOMEM;
 }
 
-#if (!(RHEL_RELEASE_CODE && RHEL_RELEASE_CODE >= RHEL_RELEASE_VERSION(5,4)))
-int _kc_pci_save_state(struct pci_dev *pdev)
-{
-	struct net_device *netdev = pci_get_drvdata(pdev);
-	struct adapter_struct *adapter = netdev_priv(netdev);
-	int size = PCI_CONFIG_SPACE_LEN, i;
-	u16 pcie_cap_offset, pcie_link_status;
-
-#if ( LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0) )
-	/* no ->dev for 2.4 kernels */
-	WARN_ON(pdev->dev.driver_data == NULL);
-#endif
-	pcie_cap_offset = pci_find_capability(pdev, PCI_CAP_ID_EXP);
-	if (pcie_cap_offset) {
-		if (!pci_read_config_word(pdev,
-		                          pcie_cap_offset + PCIE_LINK_STATUS,
-		                          &pcie_link_status))
-		size = PCIE_CONFIG_SPACE_LEN;
-	}
-	pci_config_space_ich8lan();
-#ifdef HAVE_PCI_ERS
-	if (adapter->config_space == NULL)
-#else
-	WARN_ON(adapter->config_space != NULL);
-#endif
-		adapter->config_space = kmalloc(size, GFP_KERNEL);
-	if (!adapter->config_space) {
-		printk(KERN_ERR "Out of memory in pci_save_state\n");
-		return -ENOMEM;
-	}
-	for (i = 0; i < (size / 4); i++)
-		pci_read_config_dword(pdev, i * 4, &adapter->config_space[i]);
-	return 0;
-}
-
-void _kc_pci_restore_state(struct pci_dev *pdev)
-{
-	struct net_device *netdev = pci_get_drvdata(pdev);
-	struct adapter_struct *adapter = netdev_priv(netdev);
-	int size = PCI_CONFIG_SPACE_LEN, i;
-	u16 pcie_cap_offset;
-	u16 pcie_link_status;
-
-	if (adapter->config_space != NULL) {
-		pcie_cap_offset = pci_find_capability(pdev, PCI_CAP_ID_EXP);
-		if (pcie_cap_offset &&
-		    !pci_read_config_word(pdev,
-		                          pcie_cap_offset + PCIE_LINK_STATUS,
-		                          &pcie_link_status))
-			size = PCIE_CONFIG_SPACE_LEN;
-
-		pci_config_space_ich8lan();
-		for (i = 0; i < (size / 4); i++)
-		pci_write_config_dword(pdev, i * 4, adapter->config_space[i]);
-#ifndef HAVE_PCI_ERS
-		kfree(adapter->config_space);
-		adapter->config_space = NULL;
-#endif
-	}
-}
-#endif /* !(RHEL_RELEASE_CODE >= RHEL 5.4) */
-
 #ifdef HAVE_PCI_ERS
 void _kc_free_netdev(struct net_device *netdev)
 {
@@ -814,14 +752,6 @@ void *_kc_kmemdup(const void *src, size_t len, unsigned gfp)
 	return p;
 }
 #endif /* <= 2.6.19 */
-
-/*****************************************************************************/
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
-struct pci_dev *_kc_netdev_to_pdev(struct net_device *netdev)
-{
-	return ((struct adapter_struct *)netdev_priv(netdev))->pdev;
-}
-#endif /* < 2.6.21 */
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) )
@@ -973,24 +903,6 @@ void __kc_warn_slowpath(const char *file, int line, const char *fmt, ...)
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28) )
 
 int
-_kc_pci_prepare_to_sleep(struct pci_dev *dev)
-{
-	pci_power_t target_state;
-	int error;
-
-	target_state = pci_choose_state(dev, PMSG_SUSPEND);
-
-	pci_enable_wake(dev, target_state, true);
-
-	error = pci_set_power_state(dev, target_state);
-
-	if (error)
-		pci_enable_wake(dev, target_state, false);
-
-	return error;
-}
-
-int
 _kc_pci_wake_from_d3(struct pci_dev *dev, bool enable)
 {
 	int err;
@@ -1027,10 +939,6 @@ static void __kc_pci_set_master(struct pci_dev *pdev, bool enable)
 #endif
 }
 
-void _kc_pci_clear_master(struct pci_dev *dev)
-{
-	__kc_pci_set_master(dev, false);
-}
 #endif /* < 2.6.29 */
 
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34) )

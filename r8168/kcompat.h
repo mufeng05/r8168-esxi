@@ -1994,12 +1994,6 @@ static inline int _kc_request_irq(unsigned int irq, new_handler_t handler, unsig
 #define PCI_CONFIG_SPACE_LEN 64
 #define PCIE_LINK_STATUS 0x12
 #define pci_config_space_ich8lan() do {} while(0)
-#undef pci_save_state
-extern int _kc_pci_save_state(struct pci_dev *);
-#define pci_save_state(pdev) _kc_pci_save_state(pdev)
-#undef pci_restore_state
-extern void _kc_pci_restore_state(struct pci_dev *);
-#define pci_restore_state(pdev) _kc_pci_restore_state(pdev)
 #endif /* !(RHEL_RELEASE_CODE >= RHEL 5.4) */
 
 #ifdef HAVE_PCI_ERS
@@ -2112,9 +2106,6 @@ static inline __wsum csum_unfold(__sum16 n)
 #define __aligned(x)			__attribute__((aligned(x)))
 #endif
 
-extern struct pci_dev *_kc_netdev_to_pdev(struct net_device *netdev);
-static inline struct device * netdev_to_dev(struct net_device *netdev)	{
-	return(pci_dev_to_dev(_kc_netdev_to_pdev(netdev))); }
 #else
 static inline struct device *netdev_to_dev(struct net_device *netdev)
 {
@@ -2429,9 +2420,7 @@ extern void __kc_warn_slowpath(const char *file, const int line,
 #define pci_ioremap_bar(pdev, bar)	ioremap(pci_resource_start(pdev, bar), \
 					        pci_resource_len(pdev, bar))
 #define pci_wake_from_d3 _kc_pci_wake_from_d3
-#define pci_prepare_to_sleep _kc_pci_prepare_to_sleep
 extern int _kc_pci_wake_from_d3(struct pci_dev *dev, bool enable);
-extern int _kc_pci_prepare_to_sleep(struct pci_dev *dev);
 #define netdev_alloc_page(a) alloc_page(GFP_ATOMIC)
 #ifndef __skb_queue_head_init
 static inline void __kc_skb_queue_head_init(struct sk_buff_head *list)
@@ -2463,11 +2452,6 @@ static inline void __kc_skb_queue_head_init(struct sk_buff_head *list)
 #endif /* pcie_aspm_enabled */
 
 #define  PCI_EXP_SLTSTA_PDS	0x0040	/* Presence Detect State */
-
-#ifndef pci_clear_master
-extern void _kc_pci_clear_master(struct pci_dev *dev);
-#define pci_clear_master(dev)	_kc_pci_clear_master(dev)
-#endif
 
 #ifndef PCI_EXP_LNKCTL_ASPMC
 #define  PCI_EXP_LNKCTL_ASPMC	0x0003	/* ASPM Control */
@@ -2784,19 +2768,7 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 
 #undef netdev_printk
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
-#define netdev_printk(level, netdev, format, args...)		\
-do {								\
-	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
-	printk(level "%s: " format, pci_name(pdev), ##args);	\
-} while(0)
 #elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
-#define netdev_printk(level, netdev, format, args...)		\
-do {								\
-	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
-	struct device *dev = pci_dev_to_dev(pdev);		\
-	dev_printk(level, dev, "%s: " format,			\
-		   netdev_name(netdev), ##args);		\
-} while(0)
 #else /* 2.6.21 => 2.6.34 */
 #define netdev_printk(level, netdev, format, args...)		\
 	dev_printk(level, (netdev)->dev.parent,			\

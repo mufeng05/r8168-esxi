@@ -25,6 +25,7 @@ jobs:
       run: |
             docker exec vibauthor bash -c "
             cd /build
+            ls -la ./vib-r8168
             vibauthor -C -t vib-r8168 -v r8168.vib -O r8168-offline-bundle.zip -f
             "
     

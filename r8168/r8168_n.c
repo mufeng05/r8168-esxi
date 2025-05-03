@@ -61,6 +61,8 @@
 #include <linux/rtnetlink.h>
 #include <linux/completion.h>
 
+#include <linux/ethtool.h>
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
 #include <linux/pci-aspm.h>

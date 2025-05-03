@@ -14,8 +14,8 @@ jobs:
 
     - name: Copy files
       run: |
-            sudo mkdir -p /build/vib-r8168
-            sudo cp -r ./vib-r8168 /build/vib-r8168
+            sudo mkdir -p /build
+            sudo cp -r ./vib-r8168 /build
 
     - name: Run vibauthor
       run: |
@@ -25,7 +25,6 @@ jobs:
       run: |
             docker exec vibauthor bash -c "
             cd /build
-            ls -la ./vib-r8168
             vibauthor -C -t vib-r8168 -v r8168.vib -O r8168-offline-bundle.zip -f
             "
     

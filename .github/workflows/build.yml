@@ -9,42 +9,18 @@ jobs:
 
     steps:
 
-    - name: Run centos7
-      run: |
-            docker run -itd -v /build:/build --name centos7 centos:7 bash
-    
-    - name: Initialization environment
-      run: |
-            docker exec centos7 bash -c "
-            sed -i '/^#/! s|^mirrorlist=|#mirrorlist=|' /etc/yum.repos.d/CentOS-Base.repo
-            sed -i 's|^#baseurl=http://mirror.centos.org/centos/\$releasever/|baseurl=https://vault.centos.org/7.9.2009/|g' /etc/yum.repos.d/CentOS-Base.repo
-            yum update -y
-            yum install git -y
-            yum groupinstall 'Development Tools' -y
-            git clone https://github.com/realganfan/compile-vmkdriver-env-builder.git
-            cd compile-vmkdriver-env-builder
-            bash build--esxi-driver-env-centos7.sh
-            tar -czvf /build/toolchain.tar.gz /build/toolchain/lin64
-            "
-
-    - name: Upload toolchain
-      uses: actions/upload-artifact@main
-      with:
-        name: toolchain
-        path: /build/toolchain.tar.gz
-
     - name: Checkout code
-      run: |
-            docker exec centos7 bash -c "
-            git clone https://github.com/mufeng05/r8168-esxi.git
-            "
+      uses: actions/checkout@v4
 
     - name: Copy files
       run: |
-            docker exec centos7 bash -c "
+            cp -r ./r8168-esxi/build /
             cp ./r8168-esxi/build-script/build-r8168.sh /build/vmkdrivers-gpl/
             cp -r ./r8168-esxi/r8168 /build/vmkdrivers-gpl/vmkdrivers/src_9/drivers/net
-            "
+
+    - name: Run centos7
+      run: |
+            docker run -itd -v /build:/build --name centos7 centos:7 bash
 
     - name: Build
       run: |
@@ -53,9 +29,8 @@ jobs:
             bash build-r8168.sh
             "
     
-    - name: Upload artifacts
+    - name: Upload r8168
       uses: actions/upload-artifact@main
       with:
-        name: build
-        path: /build
+        path: /build/vmkdrivers-gpl/r8168
     

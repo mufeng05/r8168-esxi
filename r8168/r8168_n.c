@@ -578,6 +578,31 @@ MODULE_VERSION(RTL8168_VERSION);
 #undef LINUX_VERSION_CODE
 #define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 
+#define CRCPOLY_LE 0xedb88320
+
+u32 crc32_le(u32 crc, unsigned char const *p, size_t len)
+{
+	int i;
+	while (len--) {
+		crc ^= *p++;
+		for (i = 0; i < 8; i++)
+			crc = (crc >> 1) ^ ((crc & 1) ? CRCPOLY_LE : 0);
+	}
+	return crc;
+}
+
+u32 bitreverse(u32 x)
+{
+	x = (x >> 16) | (x << 16);
+	x = (x >> 8 & 0x00ff00ff) | (x << 8 & 0xff00ff00);
+	x = (x >> 4 & 0x0f0f0f0f) | (x << 4 & 0xf0f0f0f0);
+	x = (x >> 2 & 0x33333333) | (x << 2 & 0xcccccccc);
+	x = (x >> 1 & 0x55555555) | (x << 1 & 0xaaaaaaaa);
+	return x;
+}
+
+#define ether_crc(length, data)    bitreverse(crc32_le(~0, data, length))
+
 //Checksum offloading backport.
 unsigned int skb_checksum(const struct sk_buff *skb, int offset,
         int len, unsigned int csum)

@@ -14,7 +14,7 @@ CC=/build/toolchain/lin64/gcc-4.8.0/bin/x86_64-linux-gcc
 LD=/build/toolchain/lin64/binutils-2.22/bin/x86_64-linux-ld
 
 # ENABLE_USE_FIRMWARE_FILE
-CONFIG_FLAGS="-DCONFIG_SOC_LAN -DENABLE_S5WOL -DCONFIG_R8168_VLAN -DCONFIG_R8168_NAPI -DENABLE_S0_MAGIC_PACKET"
+CONFIG_FLAGS="-DCONFIG_SOC_LAN -DCONFIG_R8168_VLAN -DCONFIG_R8168_NAPI -DENABLE_RSS_SUPPORT"
  
 # PR# 976913 requested that OSS binaries be stripped of debug
 LD_OPTS=--strip-debug
@@ -42,7 +42,7 @@ DFLAGS="-DLINUX -D__KERNEL__ -DMODULE -DMODVERSIONS -DEXPORT_SYMTAB \
     -DCONFIG_PCI_MSI -DCONFIG_PROC_FS -DCPU=x86-64 -DESX3_NETWORKING_NOT_DONE_YET -DGPLED_CODE -DHAVE_DCBNL_OPS_GETAPP \
     -DHAVE_IPLINK_VF_CONFIG  -DKBUILD_MODNAME=\"r8168\" -DLINUX_MODULE_AUX_HEAP_NAME=vmklnx_r8168 -DLINUX_MODULE_HEAP_INITIAL=1024*100 \
     -DLINUX_MODULE_HEAP_MAX=64*1024*1024 -DLINUX_MODULE_HEAP_NAME=vmklnx_r8168 -DLINUX_MODULE_SKB_HEAP \
-    -DLINUX_MODULE_SKB_HEAP_INITIAL=512*1024 -DLINUX_MODULE_SKB_HEAP_MAX=128*1024*1024 -DLINUX_MODULE_VERSION=\"8.052.01\" \
+    -DLINUX_MODULE_SKB_HEAP_INITIAL=512*1024 -DLINUX_MODULE_SKB_HEAP_MAX=128*1024*1024 -DLINUX_MODULE_VERSION=\"8.055.00-1\" \
     -DMODULE -DNET_DRIVER -DNO_FLOATING_POINT -DVMKERNEL -DVMKERNEL_MODULE -DVMKLINUX_MODULE_HEAP_ANY_MEM \
     -DVMK_DEVKIT_HAS_API_VMKAPI_BASE -DVMK_DEVKIT_HAS_API_VMKAPI_DEVICE -DVMK_DEVKIT_HAS_API_VMKAPI_ISCSI \
     -DVMK_DEVKIT_HAS_API_VMKAPI_NET -DVMK_DEVKIT_HAS_API_VMKAPI_RDMA -DVMK_DEVKIT_HAS_API_VMKAPI_SCSI \
@@ -77,6 +77,10 @@ $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     vmkdrivers/src_9/drivers/net/r8168/r8168_asf.c
 
 $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
+    -o BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_rss.o \
+    vmkdrivers/src_9/drivers/net/r8168/r8168_rss.c
+
+$CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     -o BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.o \
     vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.c
 
@@ -89,8 +93,10 @@ $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     vmkdrivers/src_92/common/vmklinux_module.c
 
 $LD $LD_OPTS -r -o BLD/build/vmkdriver-r8168/release/vmkernel64/r8168 \
-    --whole-archive BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_n.o \
+    --whole-archive \
+    BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_n.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_asf.o \
+    BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_rss.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtltool.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_92/common/vmklinux_module.o

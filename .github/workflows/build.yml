@@ -24,13 +24,14 @@ jobs:
             git clone https://github.com/realganfan/compile-vmkdriver-env-builder.git
             cd compile-vmkdriver-env-builder
             bash build--esxi-driver-env-centos7.sh
+            tar -czvf /build/toolchain.tar.gz /build/toolchain/lin64
             "
 
     - name: Upload toolchain
       uses: actions/upload-artifact@main
       with:
         name: toolchain
-        path: /build/toolchain/lin64
+        path: /build/toolchain.tar.gz
 
     - name: Checkout code
       run: |

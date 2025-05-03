@@ -766,6 +766,52 @@ rtl8168_tx_csum(struct sk_buff *skb,
         return true;
 }
 
+//Unresolved symbol skb_pad
+/**
+ *	skb_pad			-	zero pad the tail of an skb
+ *	@skb: buffer to pad
+ *	@pad: space to pad
+ *
+ *	Ensure that a buffer is followed by a padding area that is zero
+ *	filled. Used by network drivers which may DMA or transfer data
+ *	beyond the buffer end onto the wire.
+ *
+ *	May return error in out of memory cases. The skb is freed on error.
+ */
+ 
+ int skb_pad(struct sk_buff *skb, int pad)
+ {
+         int err;
+         int ntail;
+ 
+         /* If the skbuff is non linear tailroom is always zero.. */
+         if (!skb_cloned(skb) && skb_tailroom(skb) >= pad) {
+                 memset(skb->data+skb->len, 0, pad);
+                 return 0;
+         }
+ 
+         ntail = skb->data_len + pad - (skb->end - skb->tail);
+         if (likely(skb_cloned(skb) || ntail > 0)) {
+                 err = pskb_expand_head(skb, 0, ntail, GFP_ATOMIC);
+                 if (unlikely(err))
+                         goto free_skb;
+         }
+ 
+         /* FIXME: The use of this function with non-linear skb's really needs
+          * to be audited.
+          */
+         err = skb_linearize(skb);
+         if (unlikely(err))
+                 goto free_skb;
+ 
+         memset(skb->data + skb->len, 0, pad);
+         return 0;
+ 
+ free_skb:
+         kfree_skb(skb);
+         return err;
+ }
+
 //Unresolved symbol : synchronize_net
 /* Synchronize with packet receive processing. */
 void synchronize_net(void)

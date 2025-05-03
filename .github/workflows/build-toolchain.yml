@@ -1,0 +1,36 @@
+name: Build toolchain
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Run centos7
+      run: |
+            docker run -itd -v /build:/build --name centos7 centos:7 bash
+    
+    - name: Initialization environment
+      run: |
+            docker exec centos7 bash -c "
+            sed -i '/^#/! s|^mirrorlist=|#mirrorlist=|' /etc/yum.repos.d/CentOS-Base.repo
+            sed -i 's|^#baseurl=http://mirror.centos.org/centos/\$releasever/|baseurl=https://vault.centos.org/7.9.2009/|g' /etc/yum.repos.d/CentOS-Base.repo
+            yum update -y
+            yum install git -y
+            yum groupinstall 'Development Tools' -y
+            git clone https://github.com/realganfan/compile-vmkdriver-env-builder.git
+            cd compile-vmkdriver-env-builder
+            bash build--esxi-driver-env-centos7.sh
+            tar -czvf /build/toolchain.tar.gz /build/toolchain/lin64
+            "
+
+    - name: Upload toolchain
+      uses: actions/upload-artifact@main
+      with:
+        name: toolchain
+        path: /build/toolchain.tar.gz
+
+    

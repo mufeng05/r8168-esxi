@@ -1,4 +1,4 @@
-name: Build
+name: Build r8168
 on:
   repository_dispatch:
   workflow_dispatch:

@@ -14,16 +14,16 @@ jobs:
 
     - name: Copy files
       run: |
-            sudo cp -r ./build/vib-r8168 /build/vib-r8168
+            sudo cp -r ./build/vib-r8168 /vib-r8168
 
     - name: Run vibauthor
       run: |
-            docker run -itd -v /build:/build --name vibauthor lamw/vibauthor bash
+            docker run -itd -v /vib-r8168:/vib-r8168 --name vibauthor lamw/vibauthor bash
 
     - name: Build
       run: |
             docker exec vibauthor bash -c "
-            cd /build
+            cd /
             vibauthor -C -t ./vib-8168 --force
             "
     

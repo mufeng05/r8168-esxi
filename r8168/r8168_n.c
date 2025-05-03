@@ -766,6 +766,14 @@ rtl8168_tx_csum(struct sk_buff *skb,
         return true;
 }
 
+//Unresolved symbol : synchronize_net
+/* Synchronize with packet receive processing. */
+void synchronize_net(void)
+{
+	might_sleep();
+	synchronize_rcu();
+}
+
 //Multicast backport, VMKernel pkt_type not defined in skbuff
 struct __skbuff_mhead
 {

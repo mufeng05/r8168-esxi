@@ -199,7 +199,7 @@ typedef int netdev_tx_t;
 #define skb_transport_offset(skb) (skb->h.raw - skb->data)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,26) && !defined (__VMKLNX__)
 #define device_set_wakeup_enable(dev, val)	do {} while (0)
 #endif
 
@@ -1275,17 +1275,6 @@ struct _kc_ethtool_pauseparam {
  *	its tx lpi (after reaching 'idle' state). Effective only when eee
  *	was negotiated and tx_lpi_enabled was set.
  */
-struct ethtool_eee {
-	__u32	cmd;
-	__u32	supported;
-	__u32	advertised;
-	__u32	lp_advertised;
-	__u32	eee_active;
-	__u32	eee_enabled;
-	__u32	tx_lpi_enabled;
-	__u32	tx_lpi_timer;
-	__u32	reserved[2];
-};
 
 #define MDIO_EEE_10GT		0x0008	/* 10GT EEE cap */
 #define MDIO_EEE_1000KX		0x0010	/* 1000KX EEE cap */

@@ -1064,7 +1064,7 @@ static inline u32 netif_msg_init(int debug_value, int default_msg_enable_bits)
 
 #endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,5)
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22) && !defined(__VMKLNX__)
 static inline void eth_copy_and_sum (struct sk_buff *dest,
                                      const unsigned char *src,
                                      int len, int base)

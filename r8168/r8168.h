@@ -43,13 +43,12 @@
 #include "r8168_lib.h"
 #endif
 
+#include "kcompat.h"
+
 #if defined(LINUX_VERSION_CODE) && defined(__VMKLNX__)
 #undef LINUX_VERSION_CODE
 #define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 #endif 
-
-#undef usleep_range
-#define usleep_range(min, max)	msleep(DIV_ROUND_UP(min, 1000))
 
 /*
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)&& !defined(ENABLE_LIB_SUPPORT)

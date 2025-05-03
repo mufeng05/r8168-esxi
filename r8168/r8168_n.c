@@ -6576,10 +6576,12 @@ static void
 rtl8168_powerdown_pll(struct net_device *dev)
 {
         struct rtl8168_private *tp = netdev_priv(dev);
-
+//ESXi VMKernel hasn't global var system_state
+#if !defined(__VMKLNX__)
         /* Reboot not set wol link speed */
         if (system_state == SYSTEM_RESTART)
                 return;
+#endif
 
         if (tp->wol_enabled == WOL_ENABLED || tp->DASH || tp->EnableKCPOffload) {
                 rtl8168_set_hw_wol(dev, tp->wol_opts);

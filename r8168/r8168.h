@@ -153,7 +153,7 @@ ssize_t strscpy(char *dest, const char *src, size_t count)
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0))
 static inline unsigned char *skb_checksum_start(const struct sk_buff *skb)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)) && !defined(__VMKLNX__)
         return skb->head + skb->csum_start;
 #else /* < 2.6.22 */
         return skb_transport_header(skb);

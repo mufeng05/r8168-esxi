@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "kcompat.h": "c"
+        "kcompat.h": "c",
+        "regex": "c",
+        "vector": "c"
     }
 }

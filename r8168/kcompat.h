@@ -2787,19 +2787,13 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 #endif /* netdev_name */
 
 #undef netdev_printk
-#if defined(__VMKLNX__)
-#define netdev_printk(level, netdev, format, args...)		\
-	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
-	struct device *dev = pci_dev_to_dev(pdev);		\
-	dev_printk(level, dev, "%s: " format,			\
-		   netdev_name(netdev), ##args);
-#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
 #define netdev_printk(level, netdev, format, args...)		\
 do {								\
 	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
 	printk(level "%s: " format, pci_name(pdev), ##args);	\
 } while(0)
-#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
+#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) ) || defined(__VMKLNX__)
 #define netdev_printk(level, netdev, format, args...)		\
 do {								\
 	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
@@ -3163,7 +3157,7 @@ static inline __be16 __kc_vlan_get_protocol(const struct sk_buff *skb)
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,38) )
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) )
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) ) || defined(__VMKLNX__)
 #define skb_checksum_start_offset(skb) skb_transport_offset(skb)
 #else /* 2.6.22 -> 2.6.37 */
 static inline int _kc_skb_checksum_start_offset(const struct sk_buff *skb)

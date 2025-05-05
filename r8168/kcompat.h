@@ -2097,7 +2097,7 @@ static inline __wsum csum_unfold(__sum16 n)
 #endif /* < 2.6.20 */
 
 /*****************************************************************************/
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) ) || defined(__VMKLNX__)
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
 #define to_net_dev(class) container_of(class, struct net_device, class_dev)
 #define NETDEV_CLASS_DEV
 #if (!(RHEL_RELEASE_CODE && RHEL_RELEASE_CODE > RHEL_RELEASE_VERSION(5,5)))
@@ -2453,7 +2453,7 @@ static inline void __kc_skb_queue_head_init(struct sk_buff_head *list)
 #endif /* < 2.6.28 */
 
 /*****************************************************************************/
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29) )
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29) ) && !defined(__VMKLNX__)
 #ifndef swap
 #define swap(a, b) \
 	do { typeof(a) __tmp = (a); (a) = (b); (b) = __tmp; } while (0)
@@ -2786,6 +2786,7 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 #define netdev_name(netdev)	_kc_netdev_name(netdev)
 #endif /* netdev_name */
 
+#if !defined(__VMKLNX__)
 #undef netdev_printk
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
 #define netdev_printk(level, netdev, format, args...)		\
@@ -2793,7 +2794,7 @@ do {								\
 	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
 	printk(level "%s: " format, pci_name(pdev), ##args);	\
 } while(0)
-#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) ) || defined(__VMKLNX__)
+#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
 #define netdev_printk(level, netdev, format, args...)		\
 do {								\
 	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
@@ -2850,6 +2851,7 @@ do {								\
 	if (netif_msg_##type(priv))				\
 		netdev_printk(level, (dev), fmt, ##args);	\
 } while (0)
+#endif
 
 #undef netif_emerg
 #define netif_emerg(priv, type, dev, fmt, args...)		\

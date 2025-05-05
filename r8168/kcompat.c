@@ -1012,7 +1012,7 @@ out:
 #endif /* < 2.6.28 */
 
 /*****************************************************************************/
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29) )
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,29) ) && !defined(__VMKLNX__)
 static void __kc_pci_set_master(struct pci_dev *pdev, bool enable)
 {
 	u16 old_cmd, cmd;

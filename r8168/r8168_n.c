@@ -27193,7 +27193,9 @@ rtl8168_release_board(struct pci_dev *pdev,
 
         if (tp->pdev_cmac) {
                 iounmap(tp->cmac_ioaddr);
-                pci_clear_master(tp->pdev_cmac);
+#if !defined(__VMKLNX__)
+                pci_clear_master(tp->pci_dev);
+#endif
                 pci_release_regions(tp->pdev_cmac);
                 pci_disable_device(tp->pdev_cmac);
                 tp->pdev_cmac = NULL;
@@ -32531,7 +32533,9 @@ int rtl8168_close(struct net_device *dev)
 
                 rtl8168_down(dev);
 
+#if !defined(__VMKLNX__)
                 pci_clear_master(tp->pci_dev);
+#endif
 
                 rtl8168_hw_d3_para(dev);
 
@@ -32664,7 +32668,9 @@ rtl8168_suspend(struct pci_dev *pdev, pm_message_t state)
 
         rtl8168_hw_reset(dev);
 
-        pci_clear_master(pdev);
+#if !defined(__VMKLNX__)
+        pci_clear_master(tp->pci_dev);
+#endif
 
         rtl8168_hw_d3_para(dev);
 

@@ -2433,11 +2433,8 @@ extern void __kc_warn_slowpath(const char *file, const int line,
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28) )
 #define pci_ioremap_bar(pdev, bar)	ioremap(pci_resource_start(pdev, bar), \
 					        pci_resource_len(pdev, bar))
-#define pci_enable_msix_range _kc_pci_enable_msix_range
 #define pci_wake_from_d3 _kc_pci_wake_from_d3
 #define pci_prepare_to_sleep _kc_pci_prepare_to_sleep
-extern int _kc_pci_enable_msix_range(struct pci_dev *dev, struct msix_entry *entries,
-			       int minvec, int maxvec);
 extern int _kc_pci_wake_from_d3(struct pci_dev *dev, bool enable);
 extern int _kc_pci_prepare_to_sleep(struct pci_dev *dev);
 #define netdev_alloc_page(a) alloc_page(GFP_ATOMIC)
@@ -2581,8 +2578,6 @@ static inline void _kc_synchronize_irq(unsigned int a)
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32) )
-#undef netdev_tx_t
-#define netdev_tx_t int
 #if defined(CONFIG_FCOE) || defined(CONFIG_FCOE_MODULE)
 #ifndef NETIF_F_FCOE_MTU
 #define NETIF_F_FCOE_MTU       (1 << 26)

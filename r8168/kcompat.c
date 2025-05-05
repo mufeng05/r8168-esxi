@@ -977,30 +977,6 @@ void __kc_warn_slowpath(const char *file, int line, const char *fmt, ...)
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28) )
 
-//PCIe MSIX backport
-int _kc_pci_enable_msix_range(struct pci_dev *dev, struct msix_entry *entries,
-			       int minvec, int maxvec)
-{
-	int nvec = maxvec;
-	int rc;
-
-	if (maxvec < minvec)
-		return -ERANGE;
-
-	do {
-		rc = pci_enable_msix(dev, entries, nvec);
-		if (rc < 0) {
-			return rc;
-		} else if (rc > 0) {
-			if (rc < minvec)
-				return -ENOSPC;
-			nvec = rc;
-		}
-	} while (rc);
-
-	return nvec;
-}
-
 int
 _kc_pci_prepare_to_sleep(struct pci_dev *dev)
 {

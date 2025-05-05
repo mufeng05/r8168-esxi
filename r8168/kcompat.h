@@ -55,6 +55,11 @@
 #include <linux/ethtool.h>
 #include <linux/if_vlan.h>
 
+#if defined(LINUX_VERSION_CODE) && defined(__VMKLNX__)
+#undef LINUX_VERSION_CODE
+#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
+#endif 
+
 /* NAPI enable/disable flags here */
 #define NAPI
 
@@ -1994,6 +1999,12 @@ static inline int _kc_request_irq(unsigned int irq, new_handler_t handler, unsig
 #define PCI_CONFIG_SPACE_LEN 64
 #define PCIE_LINK_STATUS 0x12
 #define pci_config_space_ich8lan() do {} while(0)
+#undef pci_save_state
+extern int _kc_pci_save_state(struct pci_dev *);
+#define pci_save_state(pdev) _kc_pci_save_state(pdev)
+#undef pci_restore_state
+extern void _kc_pci_restore_state(struct pci_dev *);
+#define pci_restore_state(pdev) _kc_pci_restore_state(pdev)
 #endif /* !(RHEL_RELEASE_CODE >= RHEL 5.4) */
 
 #ifdef HAVE_PCI_ERS
@@ -2106,6 +2117,9 @@ static inline __wsum csum_unfold(__sum16 n)
 #define __aligned(x)			__attribute__((aligned(x)))
 #endif
 
+extern struct pci_dev *_kc_netdev_to_pdev(struct net_device *netdev);
+static inline struct device * netdev_to_dev(struct net_device *netdev)	{
+	return(pci_dev_to_dev(_kc_netdev_to_pdev(netdev))); }
 #else
 static inline struct device *netdev_to_dev(struct net_device *netdev)
 {
@@ -2419,8 +2433,13 @@ extern void __kc_warn_slowpath(const char *file, const int line,
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28) )
 #define pci_ioremap_bar(pdev, bar)	ioremap(pci_resource_start(pdev, bar), \
 					        pci_resource_len(pdev, bar))
+#define pci_enable_msix_range _kc_pci_enable_msix_range
 #define pci_wake_from_d3 _kc_pci_wake_from_d3
+#define pci_prepare_to_sleep _kc_pci_prepare_to_sleep
+extern int _kc_pci_enable_msix_range(struct pci_dev *dev, struct msix_entry *entries,
+			       int minvec, int maxvec);
 extern int _kc_pci_wake_from_d3(struct pci_dev *dev, bool enable);
+extern int _kc_pci_prepare_to_sleep(struct pci_dev *dev);
 #define netdev_alloc_page(a) alloc_page(GFP_ATOMIC)
 #ifndef __skb_queue_head_init
 static inline void __kc_skb_queue_head_init(struct sk_buff_head *list)
@@ -2452,6 +2471,11 @@ static inline void __kc_skb_queue_head_init(struct sk_buff_head *list)
 #endif /* pcie_aspm_enabled */
 
 #define  PCI_EXP_SLTSTA_PDS	0x0040	/* Presence Detect State */
+
+#ifndef pci_clear_master
+extern void _kc_pci_clear_master(struct pci_dev *dev);
+#define pci_clear_master(dev)	_kc_pci_clear_master(dev)
+#endif
 
 #ifndef PCI_EXP_LNKCTL_ASPMC
 #define  PCI_EXP_LNKCTL_ASPMC	0x0003	/* ASPM Control */
@@ -2557,7 +2581,8 @@ static inline void _kc_synchronize_irq(unsigned int a)
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32) )
-
+#undef netdev_tx_t
+#define netdev_tx_t int
 #if defined(CONFIG_FCOE) || defined(CONFIG_FCOE_MODULE)
 #ifndef NETIF_F_FCOE_MTU
 #define NETIF_F_FCOE_MTU       (1 << 26)
@@ -2765,6 +2790,71 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 }
 #define netdev_name(netdev)	_kc_netdev_name(netdev)
 #endif /* netdev_name */
+
+#undef netdev_printk
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
+#define netdev_printk(level, netdev, format, args...)		\
+do {								\
+	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
+	printk(level "%s: " format, pci_name(pdev), ##args);	\
+} while(0)
+#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
+#define netdev_printk(level, netdev, format, args...)		\
+do {								\
+	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
+	struct device *dev = pci_dev_to_dev(pdev);		\
+	dev_printk(level, dev, "%s: " format,			\
+		   netdev_name(netdev), ##args);		\
+} while(0)
+#else /* 2.6.21 => 2.6.34 */
+#define netdev_printk(level, netdev, format, args...)		\
+	dev_printk(level, (netdev)->dev.parent,			\
+		   "%s: " format,				\
+		   netdev_name(netdev), ##args)
+#endif /* <2.6.0 <2.6.21 <2.6.34 */
+#undef netdev_emerg
+#define netdev_emerg(dev, format, args...)			\
+	netdev_printk(KERN_EMERG, dev, format, ##args)
+#undef netdev_alert
+#define netdev_alert(dev, format, args...)			\
+	netdev_printk(KERN_ALERT, dev, format, ##args)
+#undef netdev_crit
+#define netdev_crit(dev, format, args...)			\
+	netdev_printk(KERN_CRIT, dev, format, ##args)
+#undef netdev_err
+#define netdev_err(dev, format, args...)			\
+	netdev_printk(KERN_ERR, dev, format, ##args)
+#undef netdev_warn
+#define netdev_warn(dev, format, args...)			\
+	netdev_printk(KERN_WARNING, dev, format, ##args)
+#undef netdev_notice
+#define netdev_notice(dev, format, args...)			\
+	netdev_printk(KERN_NOTICE, dev, format, ##args)
+#undef netdev_info
+#define netdev_info(dev, format, args...)			\
+	netdev_printk(KERN_INFO, dev, format, ##args)
+#undef netdev_dbg
+#if   defined(CONFIG_DYNAMIC_DEBUG)
+#define netdev_dbg(__dev, format, args...)			\
+do {								\
+	dynamic_dev_dbg((__dev)->dev.parent, "%s: " format,	\
+			netdev_name(__dev), ##args);		\
+} while (0)
+#else /* DEBUG */
+#define netdev_dbg(__dev, format, args...)			\
+({								\
+	if (0)							\
+		netdev_printk(KERN_DEBUG, __dev, format, ##args); \
+	0;							\
+})
+#endif /* DEBUG */
+
+#undef netif_printk
+#define netif_printk(priv, type, level, dev, fmt, args...)	\
+do {								\
+	if (netif_msg_##type(priv))				\
+		netdev_printk(level, (dev), fmt, ##args);	\
+} while (0)
 
 #undef netif_emerg
 #define netif_emerg(priv, type, dev, fmt, args...)		\
@@ -3301,7 +3391,11 @@ typedef u32 netdev_features_t;
 #undef PCI_EXP_TYPE_RC_EC
 #define  PCI_EXP_TYPE_RC_EC	0xa	/* Root Complex Event Collector */
 #ifndef CONFIG_BQL
+#define netdev_tx_completed_queue(_q, _p, _b) do {} while (0)
+#define netdev_completed_queue(_n, _p, _b) do {} while (0)
+#define netdev_tx_sent_queue(_q, _b) do {} while (0)
 #define netdev_sent_queue(_n, _b) do {} while (0)
+#define netdev_tx_reset_queue(_q) do {} while (0)
 #define netdev_reset_queue(_n) do {} while (0)
 #endif
 #else /* ! < 3.3.0 */
@@ -3418,6 +3512,62 @@ static inline u32 mmd_eee_cap_to_ethtool_sup_t(u16 eee_cap)
 		supported |= SUPPORTED_10000baseKR_Full;
 
 	return supported;
+}
+
+/**
+ * mmd_eee_adv_to_ethtool_adv_t
+ * @eee_adv: value of the MMD EEE Advertisement/Link Partner Ability registers
+ *
+ * A small helper function that translates the MMD EEE Advertisment (7.60)
+ * and MMD EEE Link Partner Ability (7.61) bits to ethtool advertisement
+ * settings.
+ */
+static inline u32 mmd_eee_adv_to_ethtool_adv_t(u16 eee_adv)
+{
+	u32 adv = 0;
+
+	if (eee_adv & MDIO_EEE_100TX)
+		adv |= ADVERTISED_100baseT_Full;
+	if (eee_adv & MDIO_EEE_1000T)
+		adv |= ADVERTISED_1000baseT_Full;
+	if (eee_adv & MDIO_EEE_10GT)
+		adv |= ADVERTISED_10000baseT_Full;
+	if (eee_adv & MDIO_EEE_1000KX)
+		adv |= ADVERTISED_1000baseKX_Full;
+	if (eee_adv & MDIO_EEE_10GKX4)
+		adv |= ADVERTISED_10000baseKX4_Full;
+	if (eee_adv & MDIO_EEE_10GKR)
+		adv |= ADVERTISED_10000baseKR_Full;
+
+	return adv;
+}
+
+/**
+ * ethtool_adv_to_mmd_eee_adv_t
+ * @adv: the ethtool advertisement settings
+ *
+ * A small helper function that translates ethtool advertisement settings
+ * to EEE advertisements for the MMD EEE Advertisement (7.60) and
+ * MMD EEE Link Partner Ability (7.61) registers.
+ */
+static inline u16 ethtool_adv_to_mmd_eee_adv_t(u32 adv)
+{
+	u16 reg = 0;
+
+	if (adv & ADVERTISED_100baseT_Full)
+		reg |= MDIO_EEE_100TX;
+	if (adv & ADVERTISED_1000baseT_Full)
+		reg |= MDIO_EEE_1000T;
+	if (adv & ADVERTISED_10000baseT_Full)
+		reg |= MDIO_EEE_10GT;
+	if (adv & ADVERTISED_1000baseKX_Full)
+		reg |= MDIO_EEE_1000KX;
+	if (adv & ADVERTISED_10000baseKX4_Full)
+		reg |= MDIO_EEE_10GKX4;
+	if (adv & ADVERTISED_10000baseKR_Full)
+		reg |= MDIO_EEE_10GKR;
+
+	return reg;
 }
 
 #ifndef pci_pcie_type

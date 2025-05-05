@@ -7,7 +7,7 @@
   <description>Recent driver for Realtek R8168. Based on official Realtek driver</description>
   <release-date>2025-05-03T20:00:00+08:00</release-date>
   <urls>
-    <url key="qwq">qwq</url>
+    <url key="github">https://github.com/mufeng05/r8168-esxi</url>
   </urls>
   <relationships>
     <depends>

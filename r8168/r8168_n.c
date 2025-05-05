@@ -843,6 +843,26 @@ bool isMulticastType(__u8 mhead)
 	return head.pkt_type == PACKET_MULTICAST;
 }
 
+static void
+rtl8168_set_pci_pme(struct rtl8168_private *tp, int set)
+{
+        struct pci_dev *pdev = tp->pci_dev;
+        u16 pmc;
+
+        int pm_cap;
+        pm_cap = pci_find_capability(pdev, PCI_CAP_ID_PM);
+        if (!pm_cap)
+                return;
+
+        pci_read_config_word(pdev, pm_cap + PCI_PM_CTRL, &pmc);
+        pmc |= PCI_PM_CTRL_PME_STATUS;
+        if (set)
+                pmc |= PCI_PM_CTRL_PME_ENABLE;
+        else
+                pmc &= ~PCI_PM_CTRL_PME_ENABLE;
+        pci_write_config_word(pdev, pm_cap + PCI_PM_CTRL, pmc);
+}
+
 #endif
 
 static void rtl8168_sleep_rx_enable(struct net_device *dev);
@@ -6499,37 +6519,25 @@ rtl8168_phy_setup_force_mode(struct net_device *dev, u32 speed, u8 duplex)
         rtl8168_mdio_write(tp, MII_BMCR, bmcr_true_force);
 }
 
+#if !defined(__VMKLNX__)
 static void
 rtl8168_set_pci_pme(struct rtl8168_private *tp, int set)
 {
         struct pci_dev *pdev = tp->pci_dev;
         u16 pmc;
 
-#if defined (__VMKLNX__)
-        int pm_cap;
-        pm_cap = pci_find_capability(pdev, PCI_CAP_ID_PM);
-        if (!pm_cap)
-#else
         if (!pdev->pm_cap)
-#endif
                 return;
 
-#if defined (__VMKLNX__)
-        pci_read_config_word(pdev, pm_cap + PCI_PM_CTRL, &pmc);
-#else
         pci_read_config_word(pdev, pdev->pm_cap + PCI_PM_CTRL, &pmc);
-#endif
         pmc |= PCI_PM_CTRL_PME_STATUS;
         if (set)
                 pmc |= PCI_PM_CTRL_PME_ENABLE;
         else
                 pmc &= ~PCI_PM_CTRL_PME_ENABLE;
-#if defined (__VMKLNX__)
-        pci_write_config_word(pdev, pm_cap + PCI_PM_CTRL, pmc);
-#else
         pci_write_config_word(pdev, pdev->pm_cap + PCI_PM_CTRL, pmc);
-#endif
 }
+#endif
 
 static void
 rtl8168_enable_giga_lite(struct rtl8168_private *tp, u32 adv)
@@ -27185,9 +27193,7 @@ rtl8168_release_board(struct pci_dev *pdev,
 
         if (tp->pdev_cmac) {
                 iounmap(tp->cmac_ioaddr);
-#if !defined(__VMKLNX__)
                 pci_clear_master(tp->pdev_cmac);
-#endif
                 pci_release_regions(tp->pdev_cmac);
                 pci_disable_device(tp->pdev_cmac);
                 tp->pdev_cmac = NULL;
@@ -31297,7 +31303,7 @@ static void rtl8168_reset_task(struct work_struct *work)
             !test_and_clear_bit(R8168_FLAG_TASK_RESET_PENDING, tp->task_flags))
                 goto out_unlock;
 
-        //netdev_err(dev, "Device reseting!\n");
+        netdev_err(dev, "Device reseting!\n");
 
         netif_carrier_off(dev);
         netif_tx_disable(dev);
@@ -31413,7 +31419,7 @@ rtl8168_tx_timeout(struct net_device *dev)
 {
         struct rtl8168_private *tp = netdev_priv(dev);
 
-        //netdev_err(dev, "Transmit timeout reset Device!\n");
+        netdev_err(dev, "Transmit timeout reset Device!\n");
 
         /* Let's wait a bit while any (async) irq lands on */
         rtl8168_schedule_reset_work(tp);
@@ -32524,9 +32530,7 @@ int rtl8168_close(struct net_device *dev)
                 set_bit(R8168_FLAG_DOWN, tp->task_flags);
 
                 rtl8168_down(dev);
-#if !defined(__VMKLNX__)
                 pci_clear_master(tp->pci_dev);
-#endif
                 rtl8168_hw_d3_para(dev);
 
                 rtl8168_powerdown_pll(dev);
@@ -32657,9 +32661,9 @@ rtl8168_suspend(struct pci_dev *pdev, pm_message_t state)
         rtl8168_dsm(dev, DSM_NIC_GOTO_D3);
 
         rtl8168_hw_reset(dev);
-#if !defined(__VMKLNX__)
+
         pci_clear_master(pdev);
-#endif
+
         rtl8168_hw_d3_para(dev);
 
 #ifdef ENABLE_FIBER_SUPPORT

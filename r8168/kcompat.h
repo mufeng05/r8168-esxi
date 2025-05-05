@@ -2097,6 +2097,7 @@ static inline __wsum csum_unfold(__sum16 n)
 #endif /* < 2.6.20 */
 
 /*****************************************************************************/
+#if !defined(__VMKLNX__)
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
 #define to_net_dev(class) container_of(class, struct net_device, class_dev)
 #define NETDEV_CLASS_DEV
@@ -2126,6 +2127,7 @@ static inline struct device *netdev_to_dev(struct net_device *netdev)
 	return &netdev->dev;
 }
 #endif /* < 2.6.21 */
+#endif
 
 /*****************************************************************************/
 #if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) )

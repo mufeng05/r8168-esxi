@@ -47,7 +47,7 @@
 
 #if defined(LINUX_VERSION_CODE) && defined(__VMKLNX__)
 #undef LINUX_VERSION_CODE
-#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
+#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,20)
 #endif 
 
 /*

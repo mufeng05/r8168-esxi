@@ -57,7 +57,7 @@
 
 #if defined(LINUX_VERSION_CODE) && defined(__VMKLNX__)
 #undef LINUX_VERSION_CODE
-#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,20)
+#define LINUX_VERSION_CODE KERNEL_VERSION(2,6,24)
 #endif 
 
 /* NAPI enable/disable flags here */
@@ -2787,7 +2787,13 @@ static inline const char *_kc_netdev_name(const struct net_device *dev)
 #endif /* netdev_name */
 
 #undef netdev_printk
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
+#if defined(__VMKLNX__)
+#define netdev_printk(level, netdev, format, args...)		\
+	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\
+	struct device *dev = pci_dev_to_dev(pdev);		\
+	dev_printk(level, dev, "%s: " format,			\
+		   netdev_name(netdev), ##args);
+#elif ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0) )
 #define netdev_printk(level, netdev, format, args...)		\
 do {								\
 	struct pci_dev *pdev = _kc_netdev_to_pdev(netdev);	\

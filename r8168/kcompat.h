@@ -2097,7 +2097,7 @@ static inline __wsum csum_unfold(__sum16 n)
 #endif /* < 2.6.20 */
 
 /*****************************************************************************/
-#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) )
+#if ( LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21) ) || defined(__VMKLNX__)
 #define to_net_dev(class) container_of(class, struct net_device, class_dev)
 #define NETDEV_CLASS_DEV
 #if (!(RHEL_RELEASE_CODE && RHEL_RELEASE_CODE > RHEL_RELEASE_VERSION(5,5)))

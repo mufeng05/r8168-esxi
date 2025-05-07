@@ -85,10 +85,6 @@ $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     vmkdrivers/src_9/drivers/net/r8168/rtltool.c
 
 $CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
-    -o BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/kcompat.o \
-    vmkdrivers/src_9/drivers/net/r8168/kcompat.c
-
-$CC $CONFIG_FLAGS $COMP_FLAGS $DFLAGS $INCLUDES -c \
     -o BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_92/common/vmklinux_module.o \
     vmkdrivers/src_92/common/vmklinux_module.c
 
@@ -98,7 +94,6 @@ $LD $LD_OPTS -r -o BLD/build/vmkdriver-r8168/release/vmkernel64/r8168 \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/r8168_asf.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtl_eeprom.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/rtltool.o \
-    BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_9/drivers/net/r8168/kcompat.o \
     BLD/build/vmkdriver-r8168/release/vmkernel64/SUBDIRS/vmkdrivers/src_92/common/vmklinux_module.o
 
 echo "[i] Build finished"

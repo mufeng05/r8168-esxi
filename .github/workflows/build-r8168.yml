@@ -12,6 +12,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Download toolchain
+      uses: actions/checkout@v4
+      with:
+        ref: toolchain
+        path: build/toolchain/lin64
+
     - name: Copy files
       run: |
             sudo cp -r ./build /

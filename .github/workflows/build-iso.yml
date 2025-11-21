@@ -42,7 +42,7 @@ jobs:
             Add-EsxSoftwareDepot "ESXi670-202503001.zip"
             Start-Sleep 2
             $imageProfile = (Get-EsxImageProfile |
-            Where-Object { $_.Name -like "ESXi-$baseESXiVer*-standard*" } |
+            Where-Object { $_.Name -like "ESXi-6.7*-standard*" } |
             Sort-Object -Property CreationTime -Descending |
             Select-Object -First 1).Name
             $newProfileName = $($imageProfile.Replace("standard", "r8168"))

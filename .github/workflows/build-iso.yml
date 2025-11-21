@@ -40,7 +40,7 @@ jobs:
       shell: pwsh
       run: |
             Add-EsxSoftwareDepot "ESXi670-202503001.zip"
-            Add-EsxSoftwareDepot "vib-r8168.zip"
+            Add-EsxSoftwareDepot "r8168-offline-bundle.zip"
             Start-Sleep 2
             $imageProfile = (Get-EsxImageProfile |
             Where-Object { $_.Name -like "ESXi-$baseESXiVer*-standard*" } |

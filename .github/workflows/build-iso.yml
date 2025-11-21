@@ -47,7 +47,7 @@ jobs:
             Sort-Object -Property CreationTime -Descending |
             Select-Object -First 1).Name
             $newProfileName = $($imageProfile.Replace("standard", "r8168"))
-            $newProfile = New-EsxImageProfile -CloneProfile $imageProfile -name $newProfileName
+            $newProfile = New-EsxImageProfile -CloneProfile $imageProfile -name $newProfileName -Vendor "VMware, Inc."
             Set-EsxImageProfile -ImageProfile $newProfile -AcceptanceLevel CommunitySupported
             Add-EsxSoftwarePackage -ImageProfile $newProfile -SoftwarePackage "net55-r8168" -Force
             Export-ESXImageProfile -ImageProfile $newProfile -ExportToIso -filepath "$newProfileName.iso" -Force

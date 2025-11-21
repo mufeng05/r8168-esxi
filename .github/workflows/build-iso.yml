@@ -15,6 +15,12 @@ jobs:
     - name: Install VMware PowerCLI
       shell: pwsh
       run: |
-            Install-Module -Name VMware.PowerCLI
+            Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+            Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force -Confirm:$false
+    
+    - name: Check
+      shell: pwsh
+      run: |
+            Get-Module -ListAvailable VMware.PowerCLI
 
     

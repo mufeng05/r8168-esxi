@@ -40,7 +40,6 @@ jobs:
       shell: pwsh
       run: |
             Add-EsxSoftwareDepot "ESXi670-202503001.zip"
-            Add-EsxSoftwareDepot "r8168-offline-bundle.zip"
             Start-Sleep 2
             $imageProfile = (Get-EsxImageProfile |
             Where-Object { $_.Name -like "ESXi-$baseESXiVer*-standard*" } |
@@ -49,6 +48,7 @@ jobs:
             $newProfileName = $($imageProfile.Replace("standard", "r8168"))
             $newProfile = New-EsxImageProfile -CloneProfile $imageProfile -name $newProfileName -Vendor "VMware, Inc."
             Set-EsxImageProfile -ImageProfile $newProfile -AcceptanceLevel CommunitySupported
+            Add-EsxSoftwareDepot "r8168-offline-bundle.zip"
             Add-EsxSoftwarePackage -ImageProfile $newProfile -SoftwarePackage "net55-r8168" -Force
             Export-ESXImageProfile -ImageProfile $newProfile -ExportToIso -filepath "$newProfileName.iso" -Force
 

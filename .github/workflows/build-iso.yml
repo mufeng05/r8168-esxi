@@ -16,7 +16,7 @@ jobs:
       shell: pwsh
       run: |
             Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-            Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force -Confirm:$false
+            Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force -Confirm:$false -AllowClobber
     
     - name: Check
       shell: pwsh

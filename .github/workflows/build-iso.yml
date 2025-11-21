@@ -1,0 +1,20 @@
+name: Build iso
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install VMware PowerCLI
+      shell: pwsh
+      run: |
+            Install-Module -Name VMware.PowerCLI
+
+    

@@ -18,9 +18,10 @@ jobs:
             Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
             Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force -Confirm:$false -AllowClobber
     
-    - name: Check
+    - name: Download zip
       shell: pwsh
       run: |
-            Get-Module -ListAvailable VMware.PowerCLI
+            Invoke-WebRequest -Uri "https://github.com/mufeng05/r8168-esxi/releases/download/ESXi670-202503001/ESXi670-202503001.zip" -OutFile "ESXi670-202503001.zip"
+            ls
 
     

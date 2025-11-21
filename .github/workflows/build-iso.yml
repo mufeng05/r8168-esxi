@@ -17,6 +17,21 @@ jobs:
       run: |
             Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
             Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force -Confirm:$false -AllowClobber
+
+    - name: Install Python
+      shell: pwsh
+      run: |
+            $pythonPath = "C:\Python311\python.exe"
+            if (-not (Test-Path $pythonPath)) {
+                Write-Host "Installing Python 3.11..."
+                Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe" -OutFile "$env:TEMP\python-3.11.6-amd64.exe"
+                Start-Process "$env:TEMP\python-3.11.6-amd64.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
+            }
+            Write-Host "Installing required Python modules for ImageBuilder..."
+            & $pythonPath -m pip install --upgrade pip
+            & $pythonPath -m pip install six lxml psutil pyopenssl --quiet
+            Write-Host "Configuring PowerCLI to use Python..."
+            Set-PowerCLIConfiguration -Scope User -PythonPath $pythonPath -Confirm:$false
     
     - name: Download zip
       shell: pwsh
